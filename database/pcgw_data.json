@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "game_count": 55309,
-  "generated": "2026-09-26T20:43:18Z",
+  "game_count": 55310,
+  "generated": "2026-09-26T23:37:19Z",
   "name_overrides": {
     "AFOP": "Avatar: Frontiers of Pandora",
     "Alan Wake 2": "Alan Wake 2",
@@ -169604,6 +169604,7 @@
     },
     "The Mound: Omen of Cthulhu": {
       "steam_appid": 2569760,
+      "dx12": true,
       "config_path": "%LOCALAPPDATA%\\TheMound\\Saved\\Config\\Windows\\GameUserSettings.ini",
       "engine": "Unreal Engine 5"
     },
@@ -186870,6 +186871,7 @@
     "Wally and the FANTASTIC PREDATORS": {
       "steam_appid": 1077450
     },
+    "Walnuts": {},
     "Walt Disney World Quest: Magical Racing Tour": {
       "config_path": "%WINDIR%\\disney.ini",
       "engine": "Crystal Engine"
