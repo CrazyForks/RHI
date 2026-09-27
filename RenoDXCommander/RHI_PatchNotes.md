@@ -1,6 +1,7 @@
 ## v2.7.8 beta
 
 ### Bug Fixes
+- Fixed RHI closing instead of restoring when double-clicking the desktop shortcut while minimised to the system tray. Caused by a wrong DLL name in a Windows API declaration (`GetCurrentThreadId` was imported from `user32.dll` instead of `kernel32.dll`), which threw an exception and crashed the running instance on some systems.
 - Fixed ASI Loader showing as installed in the Extras header when it wasn't — the tracked DLL name was persisted but the install record was gone. The stale entry is now cleared automatically.
 
 ## v2.7.7
