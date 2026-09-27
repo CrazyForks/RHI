@@ -174,7 +174,6 @@ public partial class DetailPanelBuilder
 
                 _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody({gameName})");
                 CrashReporter.Log($"[BuildNvidiaProfileBody] Starting UI build for '{gameName}' hasDlss={hasDlss} hasDlssd={hasDlssd} hasDlssg={hasDlssg} hasDlssnr={hasDlssnr} hasStreamline={hasStreamline}");
-
                 // Update card cached driver override flags so the collapsed summary shows "NV Override"
                 if (dlssData != null)
                 {
@@ -256,8 +255,7 @@ public partial class DetailPanelBuilder
                     _ = Task.Run(() => presetService.SetSrDriverOverride(capturedGameName, capturedInstallPath, enable)); } : null);
             Grid.SetColumn(srCol, 0);
             dlssRowGrid.Children.Add(srCol);
-
-            dlssRowGrid.Children.Add(MakeDlssDivider(1));
+            _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:SR done({capturedGameName})");            dlssRowGrid.Children.Add(MakeDlssDivider(1));
 
             // RR column
             bool rrDriverOverride = dlssData?.RrDriverOverride == true;
@@ -284,8 +282,7 @@ public partial class DetailPanelBuilder
                     _ = Task.Run(() => presetService.SetRrDriverOverride(capturedGameName, capturedInstallPath, enable)); } : null);
             Grid.SetColumn(rrCol, 2);
             dlssRowGrid.Children.Add(rrCol);
-
-            dlssRowGrid.Children.Add(MakeDlssDivider(3));
+            _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:RR done({capturedGameName})");            dlssRowGrid.Children.Add(MakeDlssDivider(3));
 
             // FG column — no v1.x guard (FG can be updated from v1.0.0 to newer versions)
             bool fgEnabled = hasDlssg;
@@ -347,8 +344,7 @@ public partial class DetailPanelBuilder
 
             Grid.SetColumn(fgCol, 4);
             dlssRowGrid.Children.Add(fgCol);
-
-            dlssRowGrid.Children.Add(MakeDlssDivider(5));
+            _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:FG done({capturedGameName})");            dlssRowGrid.Children.Add(MakeDlssDivider(5));
 
             // NR column — dev-only
             // hasDlssnr is a method parameter
@@ -609,8 +605,7 @@ public partial class DetailPanelBuilder
                 }
                 Grid.SetColumn(nrCol, 8);
                 dlssRowGrid.Children.Add(nrCol);
-
-                dlssRowGrid.Children.Add(MakeDlssDivider(7));
+                _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:NR done({capturedGameName})");                dlssRowGrid.Children.Add(MakeDlssDivider(7));
             }
 
             // SL column (no preset)
@@ -834,6 +829,7 @@ public partial class DetailPanelBuilder
 
             Grid.SetColumn(slCol, slColumn);
             dlssRowGrid.Children.Add(slCol);
+            _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:SL done({capturedGameName})");
 
             nvBody.Children.Add(dlssRowGrid);
         }

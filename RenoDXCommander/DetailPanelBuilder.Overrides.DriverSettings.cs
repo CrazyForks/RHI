@@ -161,6 +161,7 @@ public partial class DetailPanelBuilder
             bool isAdmin = d.IsAdmin;
 
             (nvBody ?? _window.NvidiaProfilePanel).Children.Add(UIFactory.MakeSeparator());
+            _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:GridSetup({capturedName})");
 
             var nvidiaGrid = new Grid { ColumnSpacing = 12, Opacity = isAdmin ? 1.0 : 0.4, IsHitTestVisible = isAdmin };
             // 4 columns with dividers between: col0 | div1 | col2 | div3 | col4 | div5 | col6
@@ -318,6 +319,7 @@ public partial class DetailPanelBuilder
             Grid.SetColumn(vsyncCol, 0);
             nvidiaGrid.Children.Add(vsyncCol);
             nvidiaGrid.Children.Add(MakeDlssDivider(1));
+            _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:VSync done({capturedName})");
 
             // ── Column 4: Smooth Motion ──
             var smoothCol = new StackPanel { Spacing = 4 };
@@ -457,6 +459,7 @@ public partial class DetailPanelBuilder
             Grid.SetColumn(smoothCol, 4);
             nvidiaGrid.Children.Add(smoothCol);
             nvidiaGrid.Children.Add(MakeDlssDivider(5));
+            _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:SmoothMotion done({capturedName})");
 
             // ── Column 6: Other (Power, G-Sync, Restore) ──
             var powerCol = new StackPanel { Spacing = 4 };
@@ -578,6 +581,7 @@ public partial class DetailPanelBuilder
 
             Grid.SetColumn(powerCol, 6);
             nvidiaGrid.Children.Add(powerCol);
+            _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:Power done({capturedName})");
 
             // ── Column 8: ReBAR ──
             var rebarCol = new StackPanel { Spacing = 4 };
@@ -701,6 +705,7 @@ public partial class DetailPanelBuilder
             Grid.SetColumn(rebarCol, 2);
             nvidiaGrid.Children.Add(rebarCol);
             nvidiaGrid.Children.Add(MakeDlssDivider(3));
+            _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:ReBAR done({capturedName})");
 
             (nvBody ?? _window.NvidiaProfilePanel).Children.Add(nvidiaGrid);
         }
