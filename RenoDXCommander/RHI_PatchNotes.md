@@ -1,6 +1,15 @@
-## v2.7.8 beta
+## v2.7.8
+
+### New
+- DXVK can now be installed on DirectX 11 games. All three variants (Development, Stable, Lilium HDR) fully support DX11 — the DX11 deploy path was already in place but the toggle was hidden. Lilium HDR uses its DX11-specific preset system (swapchain and render target upgrades). Games where DX12 or Vulkan is also detected are still excluded.
+- To use DXVK on a DX11 game where DX12 is also detected (common with Unreal Engine titles whose PE imports include both), set the Graphics API override to DirectX 11 in Game Overrides — this tells RHI to treat the game as DX11-only and makes the DXVK toggle available.
 
 ### Bug Fixes
+
+**OptiScaler**
+- Fixed OptiScaler auto-update using the wrong variant (Stable instead of Nightly) when a game's tracking record was created before the variant field was added. The update now cross-references the per-game variant setting when the record has no stored variant, so Nightly games always update from Nightly staging.
+
+**Other**
 - Fixed RHI closing instead of restoring when double-clicking the desktop shortcut while minimised to the system tray. Caused by a wrong DLL name in a Windows API declaration (`GetCurrentThreadId` was imported from `user32.dll` instead of `kernel32.dll`), which threw an exception and crashed the running instance on some systems.
 - Fixed ASI Loader showing as installed in the Extras header when it wasn't — the tracked DLL name was persisted but the install record was gone. The stale entry is now cleared automatically.
 
