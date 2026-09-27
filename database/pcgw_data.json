@@ -163970,7 +163970,7 @@
     "The Blood of Dawnwalker": {
       "steam_appid": 3751260,
       "dx12": true,
-      "config_path": "%LOCALAPPDATA%\\Dawnwalker\\Saved\\Config\\Windows\\*.ini",
+      "config_path": "%LOCALAPPDATA%\\Dawnwalker\\Saved\\Config\\Windows\\",
       "engine": "Unreal Engine 5"
     },
     "The Bloodline": {
