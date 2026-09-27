@@ -1,3 +1,8 @@
+## v2.7.8 beta
+
+### Bug Fixes
+- Fixed ASI Loader showing as installed in the Extras header when it wasn't — the tracked DLL name was persisted but the install record was gone. The stale entry is now cleared automatically.
+
 ## v2.7.7
 
 ### Changes
