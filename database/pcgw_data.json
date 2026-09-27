@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "game_count": 55311,
-  "generated": "2026-09-27T06:07:51Z",
+  "game_count": 55315,
+  "generated": "2026-09-27T16:22:31Z",
   "name_overrides": {
     "AFOP": "Avatar: Frontiers of Pandora",
     "Alan Wake 2": "Alan Wake 2",
@@ -92853,6 +92853,7 @@
     "Lemmings": {
       "config_path": "<path-to-game>"
     },
+    "Lemmings 2: The Tribes": {},
     "Lemmings 3D": {},
     "Lemmings Paintball": {},
     "Lemmings Revolution": {},
@@ -105717,6 +105718,7 @@
       "config_path": "<path-to-game>\\BIN\\config.pc"
     },
     "Monsters, Inc. Scream Team Training": {},
+    "Monsters, Inc. Wreck Room Arcade: Eight Ball Chaos": {},
     "Monsters: Survival": {
       "steam_appid": 1025870
     },
@@ -121770,6 +121772,7 @@
       "steam_appid": 856430
     },
     "Pinball 3": {},
+    "Pinball Builder": {},
     "Pinball Deluxe: Reloaded": {
       "steam_appid": 678310
     },
@@ -141534,6 +141537,7 @@
       "config_path": "HKEY_CURRENT_USER\\Software\\Vivid Helix\\Semispheres\\",
       "engine": "Unity"
     },
+    "Semper Fi": {},
     "SEN: Seven Eight Nine": {
       "steam_appid": 1170910,
       "engine": "Unity"
