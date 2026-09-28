@@ -1,3 +1,12 @@
+## v2.7.9 beta
+
+### Changes
+- Tonemap Offset and Scaling Offset are now exposed in the RenoDX ⚙ cog Compatibility Settings for Unity games that support them (Off / On).
+- Unity games now show the ✓ or 🔨 status icon next to the installed addon, matching the behaviour for UE-Extended and named mod games.
+
+### Bug Fixes
+- Fixed game-specific Comments from the RenoDX database not showing in the Info dialog for Unity engine games. The comments were being written to the card correctly but the dialog's wiki-source path was intercepting before they could be displayed.
+
 ## v2.7.8
 
 ### New
