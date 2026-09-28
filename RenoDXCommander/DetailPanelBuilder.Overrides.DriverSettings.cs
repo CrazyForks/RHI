@@ -168,15 +168,16 @@ public partial class DetailPanelBuilder
             (nvBody ?? _window.NvidiaProfilePanel).Children.Add(UIFactory.MakeSeparator());
             _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:GridSetup({capturedName})");
 
-            var nvidiaGrid = new Grid { ColumnSpacing = 12, Opacity = isAdmin ? 1.0 : 0.4, IsHitTestVisible = isAdmin };
-            // 4 columns with dividers between: col0 | div1 | col2 | div3 | col4 | div5 | col6
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            // Use a horizontal StackPanel instead of a Grid — star-column Grid measurement
+            // was causing UI thread freezes because WinUI must negotiate all column widths
+            // simultaneously. StackPanel measures each child independently, no negotiation.
+            var nvidiaGrid = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing = 12,
+                Opacity = isAdmin ? 1.0 : 0.4,
+                IsHitTestVisible = isAdmin,
+            };
 
             var installPathSafe = card.InstallPath ?? "";
 
@@ -321,7 +322,7 @@ public partial class DetailPanelBuilder
                 init2 = false;
             }
 
-            Grid.SetColumn(vsyncCol, 0);
+            vsyncCol.MinWidth = 110;
             nvidiaGrid.Children.Add(vsyncCol);
             nvidiaGrid.Children.Add(MakeDlssDivider(1));
             _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:VSync done({capturedName})");
@@ -461,7 +462,7 @@ public partial class DetailPanelBuilder
                 init = false;
             }
 
-            Grid.SetColumn(smoothCol, 4);
+            smoothCol.MinWidth = 110;
             nvidiaGrid.Children.Add(smoothCol);
             nvidiaGrid.Children.Add(MakeDlssDivider(5));
             _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:SmoothMotion done({capturedName})");
@@ -584,7 +585,7 @@ public partial class DetailPanelBuilder
             };
             powerCol.Children.Add(restoreProfileBtn);
 
-            Grid.SetColumn(powerCol, 6);
+            powerCol.MinWidth = 110;
             nvidiaGrid.Children.Add(powerCol);
             _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:Power done({capturedName})");
 
@@ -707,7 +708,7 @@ public partial class DetailPanelBuilder
                 sizeComboInit = false;
             }
 
-            Grid.SetColumn(rebarCol, 2);
+            rebarCol.MinWidth = 110;
             nvidiaGrid.Children.Add(rebarCol);
             nvidiaGrid.Children.Add(MakeDlssDivider(3));
             _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:ReBAR done({capturedName})");

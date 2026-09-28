@@ -28,7 +28,7 @@
 - Fixed game-specific comments from the RenoDX database not appearing in the Info dialog for Unity engine games.
 
 **Other**
-- Fixed a UI freeze when selecting a game with all five DLSS components installed (DLSS SR, RR, FG, NR, and Streamline — e.g. S.T.A.L.K.E.R. 2). The driver profile grid was being added to the panel at the same time as the DLSS columns, causing WinUI's layout engine to stall.
+- Fixed a UI freeze when selecting a game with all five DLSS components installed (DLSS SR, RR, FG, NR, and Streamline — e.g. S.T.A.L.K.E.R. 2), and when selecting any game with an NVIDIA driver profile (e.g. Big Walk). The DLSS and driver settings panels used star-column Grid layouts that forced WinUI to negotiate all column widths simultaneously, stalling the UI thread. Both panels are now built as horizontal StackPanels, which measure each column independently.
 - Fixed games launched via a custom exe override (or the auto-detected exe fallback) failing to start with a "data directory missing" or similar error. The working directory was not being set to the game folder, so the game couldn't find its files relative to the exe.
 
 ## v2.7.8
