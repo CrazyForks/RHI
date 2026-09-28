@@ -1,5 +1,8 @@
 ## v2.7.9 beta
 
+### New
+- **Unity game-specific settings** — RHI now applies per-game render target and swapchain upgrades for Unity engine games using data from the RHI database. When you install a Unity RenoDX mod, the correct `[renodx]` INI keys (upgrade formats, swapchain settings, etc.) are written automatically for each game that has a database entry.
+
 ### Changes
 - Tonemap Offset and Scaling Offset are now exposed in the RenoDX ⚙ cog Compatibility Settings for Unity games that support them (Off / On).
 - Unity games now show the ✓ or 🔨 status icon next to the installed addon, matching the behaviour for UE-Extended and named mod games.
@@ -9,6 +12,7 @@
 - Fixed the NR section addon version dropdown not showing newly released versions until the 1-hour version list cache expired. Full Refresh now bypasses the cache and fetches the latest version list immediately.
 - Fixed ShortFuse DLSS Tool and DLSS5 Tool not auto-updating in game folders when "Latest" is selected and a new version is released. NR-managed addon files are intentionally untracked by the addon deployment system, causing the auto-redeploy pass to skip them. The pass now also checks `rhi_install.txt` to confirm NR ownership.
 - Fixed rc10 sorting below rc5 in the NR addon version dropdown. Pre-release suffixes are now compared numerically as a secondary sort key.
+- Fixed custom shader files appearing pre-ticked in the per-game shader picker when no per-game selection had been saved yet. The per-game picker falls back to the global selection when opened for the first time on a game — custom file IDs are now excluded from that fallback since they are user-specific and not appropriate as a per-game default.
 
 ## v2.7.8
 
