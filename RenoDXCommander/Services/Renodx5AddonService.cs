@@ -682,7 +682,9 @@ public class Renodx5AddonService
                 return (null, null);
             }
 
-            var best = candidates.OrderByDescending(c => c.parsed).First();
+            var best = candidates.OrderByDescending(c => c.parsed)
+                                 .ThenByDescending(c => ExtractRcNumber(c.version))
+                                 .First();
             return (best.version, best.downloadUrl);
         }
         catch (Exception ex)
@@ -842,9 +844,9 @@ public class Renodx5AddonService
                     dlssSf.Add((version, downloadUrl!, parsed));
             }
 
-            // Sort newest first
-            _dlss5ToolVersions = dlss5.OrderByDescending(e => e.Parsed).Select(e => (e.Version, e.DownloadUrl)).ToList();
-            _dlssToolVersions  = dlssSf.OrderByDescending(e => e.Parsed).Select(e => (e.Version, e.DownloadUrl)).ToList();
+            // Sort newest first — secondary sort by RC number so rc10 > rc5 when base version is equal
+            _dlss5ToolVersions = dlss5.OrderByDescending(e => e.Parsed).ThenByDescending(e => ExtractRcNumber(e.Version)).Select(e => (e.Version, e.DownloadUrl)).ToList();
+            _dlssToolVersions  = dlssSf.OrderByDescending(e => e.Parsed).ThenByDescending(e => ExtractRcNumber(e.Version)).Select(e => (e.Version, e.DownloadUrl)).ToList();
 
             // ── Fetch Feeder and Bridge versions from their own repos ─────────
             _feederVersions = await FetchSimpleRepoVersionsAsync(FeederApiUrl, FeederStagedFileName).ConfigureAwait(false);
@@ -934,6 +936,21 @@ public class Renodx5AddonService
         addonType.Equals(FeederSubDir,    StringComparison.OrdinalIgnoreCase) ? (FeederSubDir,    FeederStagedFileName) :
         addonType.Equals(BridgeSubDir,    StringComparison.OrdinalIgnoreCase) ? (BridgeSubDir,    BridgeStagedFileName) :
         (Dlss5ToolSubDir, StagedFileName);
+
+    /// <summary>
+    /// Extracts the RC number from a version string like "8.5.0-rc10" → 10.
+    /// Returns 0 for non-pre-release versions (treating them as effectively rc0 = stable, sorts after rc*).
+    /// Returns int.MaxValue for stable releases so they sort above any rc.
+    /// </summary>
+    private static int ExtractRcNumber(string version)
+    {
+        var dashIdx = version.IndexOf('-');
+        if (dashIdx < 0) return int.MaxValue; // stable release — sorts highest
+        var suffix = version.Substring(dashIdx + 1).ToLowerInvariant();
+        if (suffix.StartsWith("rc") && int.TryParse(suffix.Substring(2), out var n))
+            return n;
+        return 0;
+    }
 
     private List<(string Version, string DownloadUrl)> GetVersionList(string addonType) =>
         addonType.Equals(Dlss5ToolSubDir, StringComparison.OrdinalIgnoreCase) ? _dlss5ToolVersions :
