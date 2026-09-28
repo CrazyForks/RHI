@@ -7,6 +7,7 @@
 ### Bug Fixes
 - Fixed game-specific Comments from the RenoDX database not showing in the Info dialog for Unity engine games. The comments were being written to the card correctly but the dialog's wiki-source path was intercepting before they could be displayed.
 - Fixed the NR section addon version dropdown not showing newly released versions until the 1-hour version list cache expired. Full Refresh now bypasses the cache and fetches the latest version list immediately.
+- Fixed ShortFuse DLSS Tool and DLSS5 Tool not auto-updating in game folders when "Latest" is selected and a new version is released. NR-managed addon files are intentionally untracked by the addon deployment system, causing the auto-redeploy pass to skip them. The pass now also checks `rhi_install.txt` to confirm NR ownership.
 
 ## v2.7.8
 

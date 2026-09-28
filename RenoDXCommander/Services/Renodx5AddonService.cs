@@ -526,12 +526,20 @@ public class Renodx5AddonService
                     if (inDeploy)
                     {
                         bool tracked = AddonPackService.IsAddonTrackedInDeployments(deployDir, deployFileName)
-                                    || AddonPackService.IsAddonTrackedInDeployments(game.InstallPath!, deployFileName);
+                                    || AddonPackService.IsAddonTrackedInDeployments(game.InstallPath!, deployFileName)
+                                    || Models.RhiInstallManifest.GetComponentFiles(game.InstallPath!, "ShortFuse")
+                                        .Any(f => string.Equals(Path.GetFileName(f), deployFileName, StringComparison.OrdinalIgnoreCase))
+                                    || Models.RhiInstallManifest.GetComponentFiles(game.InstallPath!, "Dlss5Tool")
+                                        .Any(f => string.Equals(Path.GetFileName(f), deployFileName, StringComparison.OrdinalIgnoreCase));
                         if (!tracked) { inDeploy = false; }
                     }
                     if (inRoot)
                     {
-                        bool tracked = AddonPackService.IsAddonTrackedInDeployments(game.InstallPath!, deployFileName);
+                        bool tracked = AddonPackService.IsAddonTrackedInDeployments(game.InstallPath!, deployFileName)
+                                    || Models.RhiInstallManifest.GetComponentFiles(game.InstallPath!, "ShortFuse")
+                                        .Any(f => string.Equals(Path.GetFileName(f), deployFileName, StringComparison.OrdinalIgnoreCase))
+                                    || Models.RhiInstallManifest.GetComponentFiles(game.InstallPath!, "Dlss5Tool")
+                                        .Any(f => string.Equals(Path.GetFileName(f), deployFileName, StringComparison.OrdinalIgnoreCase));
                         if (!tracked) { inRoot = false; }
                     }
 
