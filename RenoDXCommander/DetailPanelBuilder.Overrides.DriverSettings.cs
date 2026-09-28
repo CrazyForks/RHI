@@ -322,7 +322,7 @@ public partial class DetailPanelBuilder
                 init2 = false;
             }
 
-            vsyncCol.MinWidth = 180;
+            vsyncCol.MinWidth = 160;
             Grid.SetColumn(vsyncCol, 0);
             nvidiaGrid.Children.Add(vsyncCol);
             nvidiaGrid.Children.Add(MakeDlssDivider(1));
@@ -463,7 +463,7 @@ public partial class DetailPanelBuilder
                 init = false;
             }
 
-            smoothCol.MinWidth = 180;
+            smoothCol.MinWidth = 160;
             Grid.SetColumn(smoothCol, 4);
             nvidiaGrid.Children.Add(smoothCol);
             nvidiaGrid.Children.Add(MakeDlssDivider(5));
@@ -587,7 +587,7 @@ public partial class DetailPanelBuilder
             };
             powerCol.Children.Add(restoreProfileBtn);
 
-            powerCol.MinWidth = 180;
+            powerCol.MinWidth = 160;
             Grid.SetColumn(powerCol, 6);
             nvidiaGrid.Children.Add(powerCol);
             _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:Power done({capturedName})");
@@ -711,7 +711,7 @@ public partial class DetailPanelBuilder
                 sizeComboInit = false;
             }
 
-            rebarCol.MinWidth = 180;
+            rebarCol.MinWidth = 160;
             Grid.SetColumn(rebarCol, 2);
             nvidiaGrid.Children.Add(rebarCol);
             nvidiaGrid.Children.Add(MakeDlssDivider(3));

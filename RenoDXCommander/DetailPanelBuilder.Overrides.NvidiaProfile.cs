@@ -255,7 +255,7 @@ public partial class DetailPanelBuilder
                 onDriverOverrideToggled: presetService.IsSupported && hasDlss ? (enable) =>
                 {
                     _ = Task.Run(() => presetService.SetSrDriverOverride(capturedGameName, capturedInstallPath, enable)); } : null);
-            srCol.MinWidth = 180;
+            srCol.MinWidth = 140;
             Grid.SetColumn(srCol, 0);
             dlssRowGrid.Children.Add(srCol);
             _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:SR done({capturedGameName})");            dlssRowGrid.Children.Add(MakeDlssDivider(1));
@@ -281,7 +281,7 @@ public partial class DetailPanelBuilder
                 onDriverOverrideToggled: presetService.IsSupported && hasDlssd ? (enable) =>
                 {
                     _ = Task.Run(() => presetService.SetRrDriverOverride(capturedGameName, capturedInstallPath, enable)); } : null);
-            rrCol.MinWidth = 180;
+            rrCol.MinWidth = 140;
             Grid.SetColumn(rrCol, 2);
             dlssRowGrid.Children.Add(rrCol);
             _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:RR done({capturedGameName})");            dlssRowGrid.Children.Add(MakeDlssDivider(3));
@@ -344,7 +344,7 @@ public partial class DetailPanelBuilder
             };
             fgCol.Children.Add(mfgBtn);
 
-            fgCol.MinWidth = 180;
+            fgCol.MinWidth = 140;
             Grid.SetColumn(fgCol, 4);
             dlssRowGrid.Children.Add(fgCol);
             _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:FG done({capturedGameName})");            dlssRowGrid.Children.Add(MakeDlssDivider(5));
@@ -606,7 +606,7 @@ public partial class DetailPanelBuilder
                             child.Opacity = 0.4;
                     }
                 }
-                nrCol.MinWidth = 180;
+                nrCol.MinWidth = 140;
                 Grid.SetColumn(nrCol, 8);
                 dlssRowGrid.Children.Add(nrCol);
                 _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:NR done({capturedGameName})");                dlssRowGrid.Children.Add(MakeDlssDivider(7));
@@ -831,7 +831,7 @@ public partial class DetailPanelBuilder
             }
             ToolTipService.SetToolTip(dlssRestoreBtn, "Restore all DLSS and Streamline DLLs to their original game versions and reset presets to Default.");
 
-            slCol.MinWidth = 180;
+            slCol.MinWidth = 140;
             Grid.SetColumn(slCol, slColumn);
             dlssRowGrid.Children.Add(slCol);
             _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:SL done({capturedGameName})");
