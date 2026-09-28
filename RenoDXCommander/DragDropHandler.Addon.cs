@@ -372,9 +372,26 @@ public partial class DragDropHandler
             warningText += $"\n\nThis will replace the existing addon: {existingAddon}";
         warningText += $"\n\nInstall path: {installPath}";
 
+        // Control Ultimate Edition — inject mod-specific warning into the confirm dialog
+        string confirmTitle = "⚠ Confirm Addon Install";
+        if (ControlUePostInstallService.IsControlAddon(addonFileName))
+        {
+            confirmTitle = "⚠ Control UE — Not an HDR Mod";
+            warningText = "This is NOT an HDR mod.\n\n"
+                + "It fixes RT noise using Ray Reconstruction. Two strategies (pick one):\n"
+                + "• Turn off the in-game RT denoiser — use DLSS SR preset M or L\n"
+                + "• Use Ray Reconstruction with extra inputs from the game's shaders\n\n"
+                + "Installing will also:\n"
+                + "• Upgrade DLSS and deploy nvngx_dlssd.dll\n"
+                + "• Set renderer.ini HDR preset to the correct value\n"
+                + "• Clear the DLSS SR preset in the NVIDIA driver profile\n\n"
+                + "These changes are not reverted on uninstall.\n\n"
+                + $"Install path: {installPath}";
+        }
+
         var confirmDialog = new ContentDialog
         {
-            Title = "⚠ Confirm Addon Install",
+            Title = confirmTitle,
             Content = new TextBlock
             {
                 Text = warningText,
@@ -459,6 +476,40 @@ public partial class DragDropHandler
                     AuxInstallService.ApplyEngineIniLutSetting(targetCard.InstallPath, targetCard.EngineIniProjectOverride, gameName, targetCard.Source);
                 }
                 catch (Exception ex) { _crashReporter.Log($"[DragDropHandler.ProcessDroppedAddon] Engine.ini LUT deploy failed — {ex.Message}"); }
+            }
+
+            // ── Control Ultimate Edition special post-install ──────────────────
+            if (ControlUePostInstallService.IsControlAddon(effectiveAddonFileName))
+            {
+                await ControlUePostInstallService.RunAsync(gameName, targetCard.InstallPath);
+
+                // Rescan DLSS and rebuild the overrides panel so the NVIDIA Profile section
+                // reflects the newly deployed nvngx_dlss.dll and nvngx_dlssd.dll immediately.
+                try
+                {
+                    var dlssSvc = App.Services.GetRequiredService<IDlssStreamlineService>();
+                    var detection = dlssSvc.Detect(targetCard.InstallPath);
+                    if (detection.HasAny)
+                    {
+                        dlssSvc.RecordDlssFound(gameName);
+                        dlssSvc.RecordTrustedPath(gameName, detection);
+                    }
+                    _window.DispatcherQueue?.TryEnqueue(() =>
+                    {
+                        var live = _window.ViewModel.AllCards.FirstOrDefault(c =>
+                            c.GameName.Equals(gameName, StringComparison.OrdinalIgnoreCase)
+                            && c.Source == targetCard.Source) ?? targetCard;
+                        live.DlssDetection = detection;
+                        live.ApplyDlssDetection(detection);
+                        live.RefreshDlssVersions(dlssSvc);
+                        _window.ViewModel.RequestDetailPanelRebuild?.Invoke(live);
+                        _window.ViewModel.RequestOverridesPanelRebuild?.Invoke(live);
+                    });
+                }
+                catch (Exception dlssEx)
+                {
+                    _crashReporter.Log($"[DragDropHandler] Control UE DLSS rescan failed — {dlssEx.Message}");
+                }
             }
 
             // If this is a named mod from Discord, update the card to reflect it's no longer UE-Extended

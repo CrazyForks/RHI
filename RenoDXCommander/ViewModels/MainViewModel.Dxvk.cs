@@ -99,11 +99,20 @@ public partial class MainViewModel
                 {
                     card.DxvkActionMessage = p.message;
                     card.DxvkProgress = p.percent;
-                }));
+                }),
+                screenshotSavePath: BuildScreenshotSavePath(card.GameName),
+                overlayHotkey: _settingsViewModel.OverlayHotkey,
+                screenshotHotkey: _settingsViewModel.ScreenshotHotkey);
 
             card.DxvkActionMessage = "✅ DXVK installed!";
             card.NotifyAll();
             card.FadeMessage(m => card.DxvkActionMessage = m, card.DxvkActionMessage);
+
+            // Persist the installed variant as a per-game override so future update checks
+            // and Update All always use the correct variant regardless of the global setting.
+            // Same pattern as OptiScaler's variantHint persistence.
+            SetDxvkVariantOverride(card.GameName, resolvedVariant.ToString(), card.Source ?? "");
+
             SaveLibrary();
 
             // Persist Vulkan rendering path if direct DX9 mode switched the game to Vulkan
@@ -222,6 +231,11 @@ public partial class MainViewModel
             card.DxvkStatus = GameStatus.Installed;
             card.NotifyAll();
             card.FadeMessage(m => card.DxvkActionMessage = m, card.DxvkActionMessage);
+
+            // Re-persist the variant — ensures per-game override is locked in even when
+            // it previously fell through to the global default.
+            SetDxvkVariantOverride(card.GameName, resolvedVariant.ToString(), card.Source ?? "");
+
             SaveLibrary();
         }
         catch (Exception ex)

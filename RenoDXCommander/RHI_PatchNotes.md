@@ -1,18 +1,35 @@
 ## v2.7.9 beta
 
 ### New
-- **Unity game-specific settings** — RHI now applies per-game render target and swapchain upgrades for Unity engine games using data from the RHI database. When you install a Unity RenoDX mod, the correct `[renodx]` INI keys (upgrade formats, swapchain settings, etc.) are written automatically for each game that has a database entry.
+- **Unity game-specific settings** — RHI now writes the correct per-game INI settings when you install a RenoDX mod for a Unity engine game. Render target upgrades, swapchain format, and other compatibility keys are applied automatically based on the RHI database, with no manual configuration needed.
+- **Control Ultimate Edition** — installing the Control RR mod now handles everything automatically. RHI upgrades DLSS, deploys the Ray Reconstruction runtime, corrects the HDR preset in renderer.ini, and clears the DLSS SR preset set in the NVIDIA driver profile for the game. A description of what will happen (and a note that this is not an HDR mod) is shown before you confirm.
 
 ### Changes
-- Tonemap Offset and Scaling Offset are now exposed in the RenoDX ⚙ cog Compatibility Settings for Unity games that support them (Off / On).
+- Tonemap Offset and Scaling Offset controls are now available in the RenoDX ⚙ cog Compatibility Settings for Unity games that support them.
 - Unity games now show the ✓ or 🔨 status icon next to the installed addon, matching the behaviour for UE-Extended and named mod games.
+- Changing the global shader setting (Off / RHI Managed / Custom) in Settings now takes effect immediately across all games — no manual refresh needed.
 
 ### Bug Fixes
-- Fixed game-specific Comments from the RenoDX database not showing in the Info dialog for Unity engine games. The comments were being written to the card correctly but the dialog's wiki-source path was intercepting before they could be displayed.
-- Fixed the NR section addon version dropdown not showing newly released versions until the 1-hour version list cache expired. Full Refresh now bypasses the cache and fetches the latest version list immediately.
-- Fixed ShortFuse DLSS Tool and DLSS5 Tool not auto-updating in game folders when "Latest" is selected and a new version is released. NR-managed addon files are intentionally untracked by the addon deployment system, causing the auto-redeploy pass to skip them. The pass now also checks `rhi_install.txt` to confirm NR ownership.
-- Fixed rc10 sorting below rc5 in the NR addon version dropdown. Pre-release suffixes are now compared numerically as a secondary sort key.
-- Fixed custom shader files being auto-ticked when selecting built-in shader packs. The dependency scanner (`#include` auto-select) was matching standard ReShade headers (e.g. `ReShade.fxh`) against copies of those files in the user's custom folder, causing the entire custom folder to be selected. Custom user files are now excluded from the dependency auto-select scan.
+
+**Shaders**
+- Fixed the global shader "Off" setting overriding per-game shader overrides. Games with a per-game Custom or Select override now receive their configured shaders even when the global setting is Off. Games with no override (set to Global) continue to inherit the Off setting as before.
+- Fixed custom shader files being auto-ticked when selecting built-in shader packs. The dependency scanner was matching standard ReShade headers against copies in the user's custom folder, causing the entire custom folder to be selected automatically.
+
+**DXVK**
+- Fixed DXVK updating to the wrong variant when a game had Lilium HDR installed but no variant had been explicitly stored. In some cases a Stable or Development update would be applied instead. The installed variant is now always saved per-game after install or update. Existing Lilium HDR installs are corrected automatically on first launch.
+- Fixed the reshade.ini written during a DXVK install being missing the overlay, screenshot, and hotkey sections. Screenshot save path and hotkeys were not being carried through from Settings because the DXVK install flow bypassed the usual ReShade step.
+
+**Neural Rendering**
+- Fixed the NR addon version dropdown not showing new releases until the 1-hour cache expired. Full Refresh now bypasses the cache and fetches the current version list immediately.
+- Fixed the ShortFuse and DLSS5 Tool not auto-updating in game folders when "Latest" is selected and a new version is released. The auto-redeploy pass was skipping NR-managed files because they are intentionally untracked by the standard addon deployment system.
+- Fixed rc10 sorting below rc5 in the NR addon version dropdown.
+
+**Unity**
+- Fixed game-specific comments from the RenoDX database not appearing in the Info dialog for Unity engine games.
+
+**Other**
+- Fixed a UI freeze when selecting a game with all five DLSS components installed (DLSS SR, RR, FG, NR, and Streamline — e.g. S.T.A.L.K.E.R. 2). The driver profile grid was being added to the panel at the same time as the DLSS columns, causing WinUI's layout engine to stall.
+- Fixed games launched via a custom exe override (or the auto-detected exe fallback) failing to start with a "data directory missing" or similar error. The working directory was not being set to the game folder, so the game couldn't find its files relative to the exe.
 
 ## v2.7.8
 

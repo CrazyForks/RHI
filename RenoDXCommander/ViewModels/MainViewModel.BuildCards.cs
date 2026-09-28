@@ -1211,6 +1211,14 @@ public partial class MainViewModel
                     newCard.DxvkStatus = GameStatus.Installed;
                     newCard.DxvkInstalledVersion = dxvkRec.DxvkVersion;
 
+                    // Backfill per-game variant override for existing installs that predate
+                    // the auto-persist-on-install change. IsLiliumHdrMode is the only variant
+                    // flag stored on the record — use it to lock in LiliumHdr for those games
+                    // so the global setting can no longer cause a wrong-variant update.
+                    var existingOverride = GetDxvkVariantOverride(game.Name, game.Source ?? "");
+                    if (existingOverride == null && dxvkRec.IsLiliumHdrMode)
+                        SetDxvkVariantOverride(game.Name, "LiliumHdr", game.Source ?? "");
+
                     // Direct DX9 mode (any variant): game runs Vulkan via DXVK.
                     // Keep the original native API in DetectedApis so it still shows in
                     // DX9 searches and the badge shows "DX9 / VLK" instead of just "VLK".

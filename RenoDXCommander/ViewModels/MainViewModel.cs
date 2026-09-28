@@ -386,10 +386,6 @@ public partial class MainViewModel : ObservableObject
         if (string.Equals(shaderModeOverride, "Off", StringComparison.OrdinalIgnoreCase))
             return null;
 
-        // 0b. Global "Off" mode — overrides everything, no shaders deployed to any game
-        if (_settingsViewModel.GlobalShadersOff)
-            return null;
-
         // 1. Per-game "Custom" mode → custom shader sentinel
         if (string.Equals(shaderModeOverride, "Custom", StringComparison.OrdinalIgnoreCase))
             return new[] { ShaderPackService.CustomShaderSentinel };
@@ -402,6 +398,12 @@ public partial class MainViewModel : ObservableObject
                 || _gameNameService.PerGameShaderSelection.TryGetValue(gameName, out perGameSel))
                 return perGameSel;
         }
+
+        // 0b. Global "Off" mode — only applies when there is no active per-game override.
+        // Per-game Custom/Select (steps 1 & 2 above) are honoured even when global is Off.
+        // A per-game mode of "Global" (null/missing) means "inherit from global", so global Off wins.
+        if (_settingsViewModel.GlobalShadersOff)
+            return null;
 
         // 3. Global UseCustomShaders enabled → custom shader sentinel
         if (_settingsViewModel.UseCustomShaders)

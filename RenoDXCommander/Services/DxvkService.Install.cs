@@ -31,7 +31,10 @@ public partial class DxvkService
     /// <inheritdoc />
     public async Task InstallAsync(
         GameCardViewModel card,
-        IProgress<(string message, double percent)>? progress = null)
+        IProgress<(string message, double percent)>? progress = null,
+        string? screenshotSavePath = null,
+        string? overlayHotkey = null,
+        string? screenshotHotkey = null)
     {
         try
         {
@@ -146,7 +149,7 @@ public partial class DxvkService
 
                 // Step 5: Deploy Vulkan reshade.ini + footprint (no [PROXY] section)
                 progress?.Report(("Configuring Vulkan ReShade...", 70));
-                AuxInstallService.MergeRsVulkanIni(card.InstallPath, card.GameName);
+                AuxInstallService.MergeRsVulkanIni(card.InstallPath, card.GameName, screenshotSavePath, overlayHotkey, screenshotHotkey);
                 VulkanFootprintService.Create(card.InstallPath);
                 CrashReporter.Log("[DxvkService.InstallAsync] Direct DX9: deployed Vulkan reshade.ini + footprint");
 
@@ -225,7 +228,7 @@ public partial class DxvkService
             // - If we deploy DXVK's dxgi.dll first, then the ReShade uninstall
             //   deletes it thinking it's removing the old ReShade DLL
             progress?.Report(("Switching ReShade mode...", 25));
-            await SwitchReShadeForDxvkAsync(card, dxvkEnabled: true);
+            await SwitchReShadeForDxvkAsync(card, dxvkEnabled: true, screenshotSavePath, overlayHotkey, screenshotHotkey);
 
             progress?.Report(("Deploying DXVK DLLs...", 35));
 
@@ -881,7 +884,8 @@ public partial class DxvkService
     /// Vulkan implicit layer (no per-game DLL — the layer is system-wide).
     /// When DXVK is disabled, ReShade switches back from Vulkan layer to DX proxy.
     /// </summary>
-    private async Task SwitchReShadeForDxvkAsync(GameCardViewModel card, bool dxvkEnabled)
+    private async Task SwitchReShadeForDxvkAsync(GameCardViewModel card, bool dxvkEnabled,
+        string? screenshotSavePath = null, string? overlayHotkey = null, string? screenshotHotkey = null)
     {
         try
         {
@@ -915,7 +919,7 @@ public partial class DxvkService
                 }
 
                 // 2. Deploy reshade.vulkan.ini (as reshade.ini) to the game folder
-                AuxInstallService.MergeRsVulkanIni(card.InstallPath, card.GameName);
+                AuxInstallService.MergeRsVulkanIni(card.InstallPath, card.GameName, screenshotSavePath, overlayHotkey, screenshotHotkey);
                 CrashReporter.Log($"[DxvkService.SwitchReShadeForDxvk] {card.GameName}: deployed Vulkan reshade.ini");
 
                 // 3. Create the Vulkan footprint marker

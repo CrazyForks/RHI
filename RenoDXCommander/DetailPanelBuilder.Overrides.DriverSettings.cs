@@ -712,22 +712,48 @@ public partial class DetailPanelBuilder
             nvidiaGrid.Children.Add(MakeDlssDivider(3));
             _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:ReBAR done({capturedName})");
 
-            (nvBody ?? _window.NvidiaProfilePanel).Children.Add(nvidiaGrid);
+            // Defer adding the fully-built driver grid to the visual tree so WinUI can
+            // finish any queued layout work from the DLSS columns above before committing
+            // another large grid. Prevents the UI freeze seen on games with all five
+            // DLSS components (S.T.A.L.K.E.R. 2 and similar).
+            var targetPanel = nvBody ?? _window.NvidiaProfilePanel;
+            var isElevatedCapture = d.IsAdmin;
+            _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:AddToTree({capturedName})");
+            _window.DispatcherQueue?.TryEnqueue(
+                Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,
+                () =>
+                {
+                    targetPanel.Children.Add(nvidiaGrid);
+
+                    // Admin notice appended after the grid so it stays at the bottom
+                    targetPanel.Children.Add(new TextBlock
+                    {
+                        Text = isElevatedCapture
+                            ? "✓ Running as admin — all driver profile settings are writable."
+                            : "⚠ Admin rights required to write driver profile settings. Enable Admin Mode in Settings or restart as admin.",
+                        FontSize = 10,
+                        Foreground = UIFactory.Brush(isElevatedCapture ? ResourceKeys.TextTertiaryBrush : ResourceKeys.AccentAmberDimBrush),
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(0, 8, 0, 0),
+                    });
+                });
         }
-
-        // Admin notice at the bottom of the Nvidia Profile section
-        bool isElevated = d.IsAdmin;
-        (nvBody ?? _window.NvidiaProfilePanel).Children.Add(new TextBlock
+        // Admin notice is now added inside the deferred TryEnqueue above when nvidiaPresetService.IsSupported.
+        // When not supported we still need to add it immediately.
+        if (!nvidiaPresetService.IsSupported)
         {
-            Text = isElevated
-                ? "✓ Running as admin — all driver profile settings are writable."
-                : "⚠ Admin rights required to write driver profile settings. Enable Admin Mode in Settings or restart as admin.",
-            FontSize = 10,
-            Foreground = UIFactory.Brush(isElevated ? ResourceKeys.TextTertiaryBrush : ResourceKeys.AccentAmberDimBrush),
-            TextWrapping = TextWrapping.Wrap,
-            Margin = new Thickness(0, 8, 0, 0),
-        });
-
+            bool isElevated = d.IsAdmin;
+            (nvBody ?? _window.NvidiaProfilePanel).Children.Add(new TextBlock
+            {
+                Text = isElevated
+                    ? "✓ Running as admin — all driver profile settings are writable."
+                    : "⚠ Admin rights required to write driver profile settings. Enable Admin Mode in Settings or restart as admin.",
+                FontSize = 10,
+                Foreground = UIFactory.Brush(isElevated ? ResourceKeys.TextTertiaryBrush : ResourceKeys.AccentAmberDimBrush),
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 8, 0, 0),
+            });
+        }
     }
 }
 

@@ -684,6 +684,7 @@ public sealed partial class MainWindow
                 {
                     Arguments = launchArgs ?? "",
                     UseShellExecute = true,
+                    WorkingDirectory = System.IO.Path.GetDirectoryName(userExe) ?? "",
                 });
                 MonitorProcessForHdr(proc, shouldToggleHdr, hdrWasAlreadyOn, gameName, card.Source, card.InstallPath, hdrTargets, shouldToggleRes, resolutionToRestore);
                 return;
@@ -702,6 +703,7 @@ public sealed partial class MainWindow
                     {
                         Arguments = launchArgs ?? "",
                         UseShellExecute = true,
+                        WorkingDirectory = card.InstallPath ?? "",
                     });
                     return;
                 }
@@ -787,6 +789,7 @@ public sealed partial class MainWindow
                     {
                         Arguments = launchArgs ?? "",
                         UseShellExecute = true,
+                        WorkingDirectory = installPath,
                     });
                     MonitorProcessForHdr(proc, shouldToggleHdr, hdrWasAlreadyOn, gameName, card.Source, card.InstallPath, hdrTargets, shouldToggleRes, resolutionToRestore);
                     return;

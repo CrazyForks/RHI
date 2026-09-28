@@ -411,6 +411,8 @@ public class SettingsHandler
             ViewModel.Settings.GlobalShadersOff = combo.SelectedIndex == 0;
             ViewModel.Settings.UseCustomShaders = combo.SelectedIndex == 2;
             ViewModel.SaveSettingsPublic();
+            // Immediately sync shaders to all games so the setting takes effect without a manual refresh
+            ViewModel.DeployAllShaders();
         }
     }
 
