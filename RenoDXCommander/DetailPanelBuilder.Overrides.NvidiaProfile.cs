@@ -188,6 +188,11 @@ public partial class DetailPanelBuilder
                 BuildNvidiaProfileBody(capturedCard, capturedName, tempBody, dlssData,
                     hasDlss, hasDlssd, hasDlssg, hasStreamline, hasDlssnr);
                 dlssContainer.Children.Clear();
+                // Pre-measure at the container's actual width so WinUI reuses the cached
+                // layout result during Children.Add instead of recomputing star columns.
+                var dlssAvailW = dlssContainer.ActualWidth > 0 ? dlssContainer.ActualWidth : _window.NvidiaProfilePanel.ActualWidth;
+                if (dlssAvailW > 0)
+                    tempBody.Measure(new Windows.Foundation.Size(dlssAvailW, double.PositiveInfinity));
                 dlssContainer.Children.Add(tempBody);
                 sw.Stop();
                 if (sw.ElapsedMilliseconds > 50)
@@ -218,17 +223,15 @@ public partial class DetailPanelBuilder
             var capturedInstallPath = card.InstallPath ?? "";
             // hasDlss/hasDlssd/hasDlssg/hasStreamline/hasDlssnr passed as method params
 
-            // Auto columns avoid WinUI's expensive star-column simultaneous measurement pass.
-            // MinWidth on each content column approximates the even distribution that star columns gave.
             var dlssRowGrid = new Grid { ColumnSpacing = 12 };
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 0 SR
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 1 div
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 2 RR
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 3 div
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 4 FG
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 5 div
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 6 SL (or NR when dev-unlocked)
-            // NR column (dev-only): 2 extra Auto columns added below when FeatureFlags.DlssNr
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            // NR column (dev-only): 2 extra columns added below when DevUnlockService.IsUnlocked
 
             // SR column
             // Disable for DLSS 1.x (not compatible with 2.x+ versions in manifest)
@@ -255,10 +258,11 @@ public partial class DetailPanelBuilder
                 onDriverOverrideToggled: presetService.IsSupported && hasDlss ? (enable) =>
                 {
                     _ = Task.Run(() => presetService.SetSrDriverOverride(capturedGameName, capturedInstallPath, enable)); } : null);
-            srCol.MinWidth = 140;
             Grid.SetColumn(srCol, 0);
             dlssRowGrid.Children.Add(srCol);
             _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:SR done({capturedGameName})");            dlssRowGrid.Children.Add(MakeDlssDivider(1));
+
+            // RR column
             bool rrDriverOverride = dlssData?.RrDriverOverride == true;
             var rrCol = BuildDlssColumn("Ray Reconstruction", hasDlssd, dlssService.DlssdVersions,
                 card.DlssdInstalledVersion, DlssPresetService.RrPresets,
@@ -281,7 +285,6 @@ public partial class DetailPanelBuilder
                 onDriverOverrideToggled: presetService.IsSupported && hasDlssd ? (enable) =>
                 {
                     _ = Task.Run(() => presetService.SetRrDriverOverride(capturedGameName, capturedInstallPath, enable)); } : null);
-            rrCol.MinWidth = 140;
             Grid.SetColumn(rrCol, 2);
             dlssRowGrid.Children.Add(rrCol);
             _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:RR done({capturedGameName})");            dlssRowGrid.Children.Add(MakeDlssDivider(3));
@@ -344,7 +347,6 @@ public partial class DetailPanelBuilder
             };
             fgCol.Children.Add(mfgBtn);
 
-            fgCol.MinWidth = 140;
             Grid.SetColumn(fgCol, 4);
             dlssRowGrid.Children.Add(fgCol);
             _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:FG done({capturedGameName})");            dlssRowGrid.Children.Add(MakeDlssDivider(5));
@@ -354,8 +356,8 @@ public partial class DetailPanelBuilder
             if (FeatureFlags.DlssNr)
             {
                 // Expand the grid to 9 columns: SR, div, RR, div, FG, div, NR, div, SL
-                dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // div before SL
-                dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // NR
+                dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
                 // Determine NR installed version — show "Custom" if sidecar marker exists
                 var nrDllPath = card.DlssDetection?.DlssnrPath;
@@ -606,7 +608,6 @@ public partial class DetailPanelBuilder
                             child.Opacity = 0.4;
                     }
                 }
-                nrCol.MinWidth = 140;
                 Grid.SetColumn(nrCol, 8);
                 dlssRowGrid.Children.Add(nrCol);
                 _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:NR done({capturedGameName})");                dlssRowGrid.Children.Add(MakeDlssDivider(7));
@@ -831,7 +832,6 @@ public partial class DetailPanelBuilder
             }
             ToolTipService.SetToolTip(dlssRestoreBtn, "Restore all DLSS and Streamline DLLs to their original game versions and reset presets to Default.");
 
-            slCol.MinWidth = 140;
             Grid.SetColumn(slCol, slColumn);
             dlssRowGrid.Children.Add(slCol);
             _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody:SL done({capturedGameName})");
