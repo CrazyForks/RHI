@@ -1093,6 +1093,23 @@ public partial class MainViewModel
             }
         }
 
+        // Patch aux record channels to reflect the current per-game override before the update check.
+        // If the user changed the RS channel to Custom after the last install, the record's Channel
+        // field is stale (e.g. "Stable") — CheckReShadeUpdateLocal would wrongly flag an update.
+        // Updating Channel here ensures the pinned-channel guard fires correctly.
+        foreach (var rec in auxRecords)
+        {
+            if (rec.AddonType != AuxInstallService.TypeReShade && rec.AddonType != AuxInstallService.TypeReShadeNormal)
+                continue;
+            var card = cards.FirstOrDefault(c =>
+                c.GameName.Equals(rec.GameName, StringComparison.OrdinalIgnoreCase)
+                && (string.IsNullOrEmpty(rec.Store) || c.Source == rec.Store));
+            if (card == null) continue;
+            var effectiveChannel = ResolveReShadeChannel(rec.GameName, rec.Store ?? "");
+            if (!string.Equals(rec.Channel, effectiveChannel, StringComparison.OrdinalIgnoreCase))
+                rec.Channel = effectiveChannel;
+        }
+
         await _updateOrchestrationService.CheckForUpdatesAsync(
             cards, records, auxRecords, DispatcherQueue,
             () =>
