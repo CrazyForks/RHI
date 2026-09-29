@@ -5,7 +5,7 @@
 - **Control Ultimate Edition** — installing the Control RR mod now handles everything automatically. RHI upgrades DLSS, deploys the Ray Reconstruction runtime, corrects the HDR preset in renderer.ini, and clears the DLSS SR preset set in the NVIDIA driver profile for the game. A description of what will happen (and a note that this is not an HDR mod) is shown before you confirm.
 
 ### Changes
-- Tonemap Offset and Scaling Offset controls are now available in the RenoDX ⚙ cog Compatibility Settings for Unity games that support them.
+- Tonemap Offset and Scaling Offset controls in the RenoDX ⚙ cog Compatibility Settings now show a 0–5 range instead of Off/On. 0 = off (same as the previous Off setting).
 - Unity games now show the ✓ or 🔨 status icon next to the installed addon, matching the behaviour for UE-Extended and named mod games.
 - Changing the global shader setting (Off / RHI Managed / Custom) in Settings now takes effect immediately across all games — no manual refresh needed.
 
@@ -28,8 +28,8 @@
 - Fixed game-specific comments from the RenoDX database not appearing in the Info dialog for Unity engine games.
 
 **Other**
-- Fixed a UI freeze when selecting a game with all five DLSS components installed (DLSS SR, RR, FG, NR, and Streamline — e.g. S.T.A.L.K.E.R. 2), and when selecting any game with an NVIDIA driver profile (e.g. Big Walk). The DLSS and driver settings panels used star-column Grid layouts that forced WinUI to negotiate all column widths simultaneously, stalling the UI thread. Both panels are now built as horizontal StackPanels, which measure each column independently.
 - Fixed games launched via a custom exe override (or the auto-detected exe fallback) failing to start with a "data directory missing" or similar error. The working directory was not being set to the game folder, so the game couldn't find its files relative to the exe.
+- Improved: the DLSS and driver settings sections of the NVIDIA Profile panel now pre-measure their grid layout before committing to the visual tree, reducing the chance of a UI freeze when selecting games with full DLSS installs (e.g. S.T.A.L.K.E.R. 2, Assassin's Creed Shadows). Under investigation if further changes are needed.
 
 ## v2.7.8
 
