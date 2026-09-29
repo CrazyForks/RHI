@@ -585,7 +585,7 @@ public sealed partial class MainWindow
                 catch (Exception ex) { card.ActionMessage = $"❌ {ex.Message}"; }
             };
 
-            var nitsInputPanel = new StackPanel { Orientation = Microsoft.UI.Xaml.Controls.Orientation.Horizontal, Spacing = 6, VerticalAlignment = VerticalAlignment.Center };
+            var nitsInputPanel = new StackPanel { Orientation = Microsoft.UI.Xaml.Controls.Orientation.Vertical, Spacing = 4, VerticalAlignment = VerticalAlignment.Center };
             nitsInputPanel.Children.Add(nitsBox);
             nitsInputPanel.Children.Add(autoBtn);
             Grid.SetRow(nitsInputPanel, topGridRow);
