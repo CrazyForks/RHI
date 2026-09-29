@@ -1,13 +1,15 @@
 ## v2.7.9 beta
 
+## v2.7.9 beta
+
 ### New
 - **Unity game-specific settings** — RHI now writes the correct per-game INI settings when you install a RenoDX mod for a Unity engine game. Render target upgrades, swapchain format, and other compatibility keys are applied automatically based on the RHI database, with no manual configuration needed.
 - **Control Ultimate Edition** — installing the Control RR mod now handles everything automatically. RHI upgrades DLSS, deploys the Ray Reconstruction runtime, corrects the HDR preset in renderer.ini, and clears the DLSS SR preset set in the NVIDIA driver profile for the game. A description of what will happen (and a note that this is not an HDR mod) is shown before you confirm.
 
 ### Changes
-- Tonemap Offset and Scaling Offset controls in the RenoDX ⚙ cog Compatibility Settings now show a 0–5 range instead of Off/On. 0 = off (same as the previous Off setting).
 - Unity games now show the ✓ or 🔨 status icon next to the installed addon, matching the behaviour for UE-Extended and named mod games.
 - Changing the global shader setting (Off / RHI Managed / Custom) in Settings now takes effect immediately across all games — no manual refresh needed.
+- The RenoDX ⚙ cog Compatibility Settings now show correct options for all keys. Blit Copy Hack shows Off / Auto / On / Scaling Only. Copy Destinations shows Off / On / Auto Upgrade. Swapchain Format (previously "Color Space") shows HDR10 / scRGB. Tonemap Offset and Scaling Offset show a 0–5 range. Proxy Revert State and Swapchain Compat are now exposed. Upgrade Path and Engine.ini settings (HDR and LUT) have moved into the UE-Extended Settings section alongside nits, with a vertical divider separating left and right columns.
 
 ### Bug Fixes
 
@@ -23,6 +25,9 @@
 - Fixed the NR addon version dropdown not showing new releases until the 1-hour cache expired. Full Refresh now bypasses the cache and fetches the current version list immediately.
 - Fixed the ShortFuse and DLSS5 Tool not auto-updating in game folders when "Latest" is selected and a new version is released. The auto-redeploy pass was skipping NR-managed files because they are intentionally untracked by the standard addon deployment system.
 - Fixed rc10 sorting below rc5 in the NR addon version dropdown.
+
+**ReShade**
+- Fixed games with a Custom ReShade channel showing a false update notification on every launch. The update check was reading the channel from the install record (which stored the channel used at install time, e.g. Stable) rather than the current per-game override. The check now always uses the effective channel.
 
 **Unity**
 - Fixed game-specific comments from the RenoDX database not appearing in the Info dialog for Unity engine games.
