@@ -124,18 +124,22 @@ public class UnrealEntry : INotifyPropertyChanged
 
     /// <summary>
     /// Valid value tokens for Unity entries — (DisplayLabel, StoredValue) pairs.
-    /// Format upgrade sizes use the same text as UE-Extended. Boolean settings use 0/1/2.
+    /// Format upgrade sizes use the same text as UE-Extended. Boolean settings use numeric values.
+    /// The value column is shared across all keys — labels are generic where values overlap.
     /// </summary>
     public static readonly (string Label, string Value)[] UnitySizeValuePairs =
     [
-        ("Output Size",           "Output Size"),
-        ("Output Ratio",          "Output Ratio"),
-        ("Any Size",              "Any Size"),
-        ("Off (0)",               "0"),
-        ("On (1)",                "1"),
-        ("On - Compat (2)",       "2"),
-        ("Linear (0)",            "0"),
-        ("Gamma (1)",             "1"),
+        // Upgrade format sizes
+        ("Output Size",       "Output Size"),
+        ("Output Ratio",      "Output Ratio"),
+        ("Any Size",          "Any Size"),
+        // Numeric values 0-5 (cover Off/On/modes/offsets for all Unity keys)
+        ("0",                 "0"),
+        ("1",                 "1"),
+        ("2",                 "2"),
+        ("3",                 "3"),
+        ("4",                 "4"),
+        ("5",                 "5"),
     ];
 
     /// <summary>
