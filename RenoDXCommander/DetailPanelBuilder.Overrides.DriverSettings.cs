@@ -151,20 +151,17 @@ public partial class DetailPanelBuilder
                 _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData({gameName})");
                 var sw = System.Diagnostics.Stopwatch.StartNew();
                 // Build into a throwaway container first, then swap atomically.
+                // Compute column width from the container width — fixed-pixel columns avoid the
+                // WinUI infinite star-column layout loop (Grid+star+StackPanel+ScrollViewer = hang).
+                var availW = driverContainer.ActualWidth > 0 ? driverContainer.ActualWidth : _window.NvidiaProfilePanel.ActualWidth;
                 var tempDriver = new StackPanel();
-                BuildDriverProfileSectionWithData(targetCard, capturedName, svc, tempDriver, data);
+                BuildDriverProfileSectionWithData(targetCard, capturedName, svc, tempDriver, data, availW);
                 sw.Stop();
                 if (sw.ElapsedMilliseconds > 50)
                     CrashReporter.Log($"[BuildDriverProfileSectionWithData] SLOW build: '{gameName}' took {sw.ElapsedMilliseconds}ms");
                 _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:AddToTree({gameName})");
                 var sw2 = System.Diagnostics.Stopwatch.StartNew();
                 driverContainer.Children.Clear();
-                // Pre-measure the element at the container's actual width before adding to
-                // the live tree. WinUI caches the result so the Children.Add layout pass
-                // reuses it instead of recomputing the expensive star-column measurement.
-                var availW = driverContainer.ActualWidth > 0 ? driverContainer.ActualWidth : _window.NvidiaProfilePanel.ActualWidth;
-                if (availW > 0)
-                    tempDriver.Measure(new Windows.Foundation.Size(availW, double.PositiveInfinity));
                 driverContainer.Children.Add(tempDriver);
                 sw2.Stop();
                 if (sw2.ElapsedMilliseconds > 50)
@@ -174,7 +171,8 @@ public partial class DetailPanelBuilder
     }
 
     private void BuildDriverProfileSectionWithData(GameCardViewModel card, string capturedName,
-        DlssPresetService nvidiaPresetService, StackPanel? nvBody, DriverProfileData d)
+        DlssPresetService nvidiaPresetService, StackPanel? nvBody, DriverProfileData d,
+        double containerWidth = 0)
     {
         // ══════════════════════════════════════════════════════════════════════
         // Nvidia Profile Settings — VSync, Latency, Smooth Motion, Power/CPU, ReBAR
@@ -187,14 +185,24 @@ public partial class DetailPanelBuilder
             _window.ViewModel.SetLastUiAction($"BuildDriverProfileSectionWithData:GridSetup({capturedName})");
 
             var nvidiaGrid = new Grid { ColumnSpacing = 12, Opacity = isAdmin ? 1.0 : 0.4, IsHitTestVisible = isAdmin };
-            // 4 columns with dividers between: col0 | div1 | col2 | div3 | col4 | div5 | col6
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            // Use fixed-pixel column widths to avoid the WinUI infinite layout loop.
+            // Star columns inside a StackPanel inside ScrollViewer cause an infinite measurement cycle.
+            // We compute equal column widths from the container width: 4 columns + 3 x 1px dividers.
+            // Fall back to 200px per column if container width isn't available yet.
+            const double DividerWidth = 1.0;
+            const int DividerCount   = 3;
+            const int ColCount       = 4;
+            double colW = containerWidth > DividerCount * DividerWidth
+                ? (containerWidth - DividerCount * DividerWidth) / ColCount
+                : 200.0;
+
+            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colW) });
+            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(DividerWidth) });
+            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colW) });
+            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(DividerWidth) });
+            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colW) });
+            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(DividerWidth) });
+            nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colW) });
 
             var installPathSafe = card.InstallPath ?? "";
 

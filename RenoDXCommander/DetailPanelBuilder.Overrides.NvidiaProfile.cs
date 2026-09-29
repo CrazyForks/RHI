@@ -185,14 +185,10 @@ public partial class DetailPanelBuilder
 
                 // Build into a throwaway container first, then swap atomically.
                 var tempBody = new StackPanel { Spacing = dlssContainer.Spacing };
-                BuildNvidiaProfileBody(capturedCard, capturedName, tempBody, dlssData,
-                    hasDlss, hasDlssd, hasDlssg, hasStreamline, hasDlssnr);
-                dlssContainer.Children.Clear();
-                // Pre-measure at the container's actual width so WinUI reuses the cached
-                // layout result during Children.Add instead of recomputing star columns.
                 var dlssAvailW = dlssContainer.ActualWidth > 0 ? dlssContainer.ActualWidth : _window.NvidiaProfilePanel.ActualWidth;
-                if (dlssAvailW > 0)
-                    tempBody.Measure(new Windows.Foundation.Size(dlssAvailW, double.PositiveInfinity));
+                BuildNvidiaProfileBody(capturedCard, capturedName, tempBody, dlssData,
+                    hasDlss, hasDlssd, hasDlssg, hasStreamline, hasDlssnr, dlssAvailW);
+                dlssContainer.Children.Clear();
                 dlssContainer.Children.Add(tempBody);
                 sw.Stop();
                 if (sw.ElapsedMilliseconds > 50)
@@ -209,7 +205,8 @@ public partial class DetailPanelBuilder
 
     private void BuildNvidiaProfileBody(GameCardViewModel card, string capturedName,
         StackPanel nvBody, DlssProfileData? dlssData,
-        bool hasDlss, bool hasDlssd, bool hasDlssg, bool hasStreamline, bool hasDlssnr)
+        bool hasDlss, bool hasDlssd, bool hasDlssg, bool hasStreamline, bool hasDlssnr,
+        double containerWidth = 0)
     {
         // Clear the loading indicator (or any stale content from a previous build pass)
         nvBody.Children.Clear();
@@ -224,13 +221,23 @@ public partial class DetailPanelBuilder
             // hasDlss/hasDlssd/hasDlssg/hasStreamline/hasDlssnr passed as method params
 
             var dlssRowGrid = new Grid { ColumnSpacing = 12 };
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            // Use fixed-pixel column widths to avoid the WinUI infinite layout loop
+            // (star columns + StackPanel + ScrollViewer = permanent hang).
+            // NR col may be appended later — we recalculate colW there if needed.
+            const double DlssDivW = 1.0;
+            int dlssInitialCols = 4; // SR, RR, FG, SL (NR added later if dev-unlocked)
+            int dlssInitialDivs = 3;
+            double dlssColW = containerWidth > dlssInitialDivs * DlssDivW
+                ? (containerWidth - dlssInitialDivs * DlssDivW) / dlssInitialCols
+                : 160.0;
+
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(dlssColW) }); // 0 SR
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(DlssDivW) });  // 1 div
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(dlssColW) }); // 2 RR
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(DlssDivW) });  // 3 div
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(dlssColW) }); // 4 FG
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(DlssDivW) });  // 5 div
+            dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(dlssColW) }); // 6 SL
             // NR column (dev-only): 2 extra columns added below when DevUnlockService.IsUnlocked
 
             // SR column
@@ -356,8 +363,15 @@ public partial class DetailPanelBuilder
             if (FeatureFlags.DlssNr)
             {
                 // Expand the grid to 9 columns: SR, div, RR, div, FG, div, NR, div, SL
-                dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                // Recalculate column width for 5 equal columns + 4 dividers
+                double dlssColW5 = containerWidth > 4 * DlssDivW
+                    ? (containerWidth - 4 * DlssDivW) / 5
+                    : 128.0;
+                // Resize all existing star columns to the new width
+                foreach (var cd in dlssRowGrid.ColumnDefinitions)
+                    if (cd.Width.Value > DlssDivW) cd.Width = new GridLength(dlssColW5);
+                dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(DlssDivW) });
+                dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(dlssColW5) });
 
                 // Determine NR installed version — show "Custom" if sidecar marker exists
                 var nrDllPath = card.DlssDetection?.DlssnrPath;
