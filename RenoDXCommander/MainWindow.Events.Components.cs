@@ -492,14 +492,15 @@ public sealed partial class MainWindow
             };
             Grid.SetRow(nitsLabel, topGridRow);
             Grid.SetColumn(nitsLabel, 0);
+            Grid.SetRowSpan(nitsLabel, 2);
             topGrid.Children.Add(nitsLabel);
 
             var nitsBox = new TextBox
             {
                 Text = currentNits,
-                Width = 100,
                 FontSize = 11,
                 PlaceholderText = "nits",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Center,
             };
 
@@ -585,12 +586,17 @@ public sealed partial class MainWindow
                 catch (Exception ex) { card.ActionMessage = $"❌ {ex.Message}"; }
             };
 
-            var nitsInputPanel = new StackPanel { Orientation = Microsoft.UI.Xaml.Controls.Orientation.Vertical, Spacing = 4, VerticalAlignment = VerticalAlignment.Center };
-            nitsInputPanel.Children.Add(nitsBox);
-            nitsInputPanel.Children.Add(autoBtn);
-            Grid.SetRow(nitsInputPanel, topGridRow);
-            Grid.SetColumn(nitsInputPanel, 1);
-            topGrid.Children.Add(nitsInputPanel);
+            // nitsBox on its own row
+            Grid.SetRow(nitsBox, topGridRow);
+            Grid.SetColumn(nitsBox, 1);
+            topGrid.Children.Add(nitsBox);
+            topGridRow++;
+
+            // Auto button on the next row (doesn't inflate the nits row height)
+            topGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            Grid.SetRow(autoBtn, topGridRow);
+            Grid.SetColumn(autoBtn, 1);
+            topGrid.Children.Add(autoBtn);
             topGridRow++;
         }
 
