@@ -192,8 +192,11 @@ public partial class DetailPanelBuilder
             const double DividerWidth = 1.0;
             const int DividerCount   = 3;
             const int ColCount       = 4;
-            double colW = containerWidth > DividerCount * DividerWidth
-                ? (containerWidth - DividerCount * DividerWidth) / ColCount
+            const double ColSpacing  = 12.0; // nvidiaGrid.ColumnSpacing
+            // Total width consumed: ColumnSpacing between all 7 columns (6 gaps) + 3 divider columns
+            double overhead = (ColCount + DividerCount - 1) * ColSpacing + DividerCount * DividerWidth;
+            double colW = containerWidth > overhead
+                ? (containerWidth - overhead) / ColCount
                 : 200.0;
 
             nvidiaGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colW) });

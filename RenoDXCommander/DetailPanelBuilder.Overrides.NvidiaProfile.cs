@@ -227,8 +227,11 @@ public partial class DetailPanelBuilder
             const double DlssDivW = 1.0;
             int dlssInitialCols = 4; // SR, RR, FG, SL (NR added later if dev-unlocked)
             int dlssInitialDivs = 3;
-            double dlssColW = containerWidth > dlssInitialDivs * DlssDivW
-                ? (containerWidth - dlssInitialDivs * DlssDivW) / dlssInitialCols
+            const double DlssColSpacing = 12.0; // dlssRowGrid.ColumnSpacing
+            // Total width consumed: ColumnSpacing between all 7 columns (6 gaps) + 3 divider columns
+            double dlssOverhead = (dlssInitialCols + dlssInitialDivs - 1) * DlssColSpacing + dlssInitialDivs * DlssDivW;
+            double dlssColW = containerWidth > dlssOverhead
+                ? (containerWidth - dlssOverhead) / dlssInitialCols
                 : 160.0;
 
             dlssRowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(dlssColW) }); // 0 SR
@@ -363,9 +366,10 @@ public partial class DetailPanelBuilder
             if (FeatureFlags.DlssNr)
             {
                 // Expand the grid to 9 columns: SR, div, RR, div, FG, div, NR, div, SL
-                // Recalculate column width for 5 equal columns + 4 dividers
-                double dlssColW5 = containerWidth > 4 * DlssDivW
-                    ? (containerWidth - 4 * DlssDivW) / 5
+                // Recalculate column width for 5 equal columns + 4 dividers, 8 gaps of ColumnSpacing
+                double dlssOverhead5 = (5 + 4 - 1) * DlssColSpacing + 4 * DlssDivW;
+                double dlssColW5 = containerWidth > dlssOverhead5
+                    ? (containerWidth - dlssOverhead5) / 5
                     : 128.0;
                 // Resize all existing star columns to the new width
                 foreach (var cd in dlssRowGrid.ColumnDefinitions)
