@@ -1093,21 +1093,19 @@ public partial class MainViewModel
             }
         }
 
-        // Patch aux record channels to reflect the current per-game override before the update check.
-        // If the user changed the RS channel to Custom after the last install, the record's Channel
-        // field is stale (e.g. "Stable") — CheckReShadeUpdateLocal would wrongly flag an update.
-        // Updating Channel here ensures the pinned-channel guard fires correctly.
-        foreach (var rec in auxRecords)
+        // Patch RS record channels to reflect the current per-game override before the update check.
+        // The update service uses card.RsRecord.Channel (not auxRecords) for the pinned-channel guard.
+        // If the user changed the channel to Custom after the last install, the record's Channel
+        // is stale — patch it here so CheckReShadeUpdateLocal correctly skips custom/legacy channels.
+        foreach (var card in cards)
         {
-            if (rec.AddonType != AuxInstallService.TypeReShade && rec.AddonType != AuxInstallService.TypeReShadeNormal)
-                continue;
-            var card = cards.FirstOrDefault(c =>
-                c.GameName.Equals(rec.GameName, StringComparison.OrdinalIgnoreCase)
-                && (string.IsNullOrEmpty(rec.Store) || c.Source == rec.Store));
-            if (card == null) continue;
-            var effectiveChannel = ResolveReShadeChannel(rec.GameName, rec.Store ?? "");
-            if (!string.Equals(rec.Channel, effectiveChannel, StringComparison.OrdinalIgnoreCase))
-                rec.Channel = effectiveChannel;
+            if (card.RsRecord == null) continue;
+            var effectiveChannel = ResolveReShadeChannel(card.GameName, card.Source ?? "");
+            if (!string.Equals(card.RsRecord.Channel, effectiveChannel, StringComparison.OrdinalIgnoreCase))
+            {
+                _crashReporter.Log($"[CheckForUpdatesAsync] Patching RS channel for '{card.GameName}': '{card.RsRecord.Channel}' → '{effectiveChannel}'");
+                card.RsRecord.Channel = effectiveChannel;
+            }
         }
 
         await _updateOrchestrationService.CheckForUpdatesAsync(
