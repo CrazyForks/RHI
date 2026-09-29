@@ -100,6 +100,7 @@ public class UnrealEntry : INotifyPropertyChanged
         "Upgrade_R16G16B16A16_UNORM",
         "Upgrade_CopyDestinations",
         "Upgrade_UseSCRGB",
+        "Upgrade_SwapChainCompatibility",
         "Use_Swapchain_Proxy",
         "Use_Resource_Cloning",
         "Force_Pipeline_Cloning",
