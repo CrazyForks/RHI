@@ -139,7 +139,10 @@ public partial class DetailPanelBuilder
                 // Guard: if Settings panel is open, the NVIDIA profile section isn't visible.
                 // Skip the expensive Children.Add to avoid freezing the UI thread while the
                 // user is in Settings (e.g. after clicking Check for Updates).
-                if (_window.SettingsPanel.Visibility == Microsoft.UI.Xaml.Visibility.Visible)
+                // Also skip if a dialog is open (e.g. app update download in progress) —
+                // the user is not looking at this panel and the layout work will block the dialog.
+                if (_window.SettingsPanel.Visibility == Microsoft.UI.Xaml.Visibility.Visible
+                    || DialogService.IsDialogOpen)
                 {
                     CrashReporter.Log($"[BuildDriverProfileSectionWithData] Skipped AddToTree for '{gameName}' — Settings panel is open");
                     return;
