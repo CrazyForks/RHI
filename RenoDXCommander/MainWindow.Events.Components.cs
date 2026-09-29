@@ -602,10 +602,10 @@ public sealed partial class MainWindow
             var upgradeKeys = renodxSection
                 .Where(kv => (kv.Key.StartsWith("Upgrade_", StringComparison.OrdinalIgnoreCase)
                               && !kv.Key.Equals("Upgrade_UseSCRGB", StringComparison.OrdinalIgnoreCase)
-                              && !kv.Key.Equals("Upgrade_CopyDestinations", StringComparison.OrdinalIgnoreCase)
-                              && !kv.Key.Equals("Upgrade_SwapChainCompatibility", StringComparison.OrdinalIgnoreCase))
+                              && !kv.Key.Equals("Upgrade_CopyDestinations", StringComparison.OrdinalIgnoreCase))
                           || kv.Key.Equals("Set_Path", StringComparison.OrdinalIgnoreCase)
                           || kv.Key.Equals("DumpLUTShaders", StringComparison.OrdinalIgnoreCase)
+                          || kv.Key.Equals("SettingsMode",           StringComparison.OrdinalIgnoreCase)
                           // Unity engine settings
                           || kv.Key.Equals("Use_Swapchain_Proxy",    StringComparison.OrdinalIgnoreCase)
                           || kv.Key.Equals("Swapchain_Encoding",     StringComparison.OrdinalIgnoreCase)
@@ -662,6 +662,8 @@ public sealed partial class MainWindow
                     bool isBlitCopyHack  = kv.Key.Equals("Blit_Copy_Hack",             StringComparison.OrdinalIgnoreCase);
                     bool isCopyDest      = kv.Key.Equals("Upgrade_CopyDestinations",   StringComparison.OrdinalIgnoreCase);
                     bool isUseScrGb      = kv.Key.Equals("Upgrade_UseSCRGB",           StringComparison.OrdinalIgnoreCase);
+                    bool isSettingsMode  = kv.Key.Equals("SettingsMode",               StringComparison.OrdinalIgnoreCase);
+                    bool isSwapChainCompat = kv.Key.Equals("Upgrade_SwapChainCompatibility", StringComparison.OrdinalIgnoreCase);
                     bool isBinaryToggle = isSetPath || isDumpLut || isUnityBool;
 
                     // Label text
@@ -669,8 +671,10 @@ public sealed partial class MainWindow
                         : isDumpLut          ? "Dump LUT Shaders"
                         : isSwapchainProxy   ? "Swapchain Proxy"
                         : isSwapchainEncoding? "Swapchain Encoding"
-                        : isUseScrGb         ? "Color Space"
+                        : isUseScrGb         ? "Swapchain Format"
                         : isCopyDest         ? "Copy Destinations"
+                        : isSettingsMode     ? "Proxy Revert State"
+                        : isSwapChainCompat  ? "Swapchain Compat"
                         : kv.Key.StartsWith("Upgrade_", StringComparison.OrdinalIgnoreCase) ? kv.Key.Substring(8)
                         : kv.Key.Replace('_', ' ');
 
@@ -693,12 +697,13 @@ public sealed partial class MainWindow
                     else if (isBlitCopyHack) { combo.Items.Add("Off"); combo.Items.Add("Auto"); combo.Items.Add("On"); combo.Items.Add("Scaling Only"); }
                     else if (isCopyDest) { combo.Items.Add("Off"); combo.Items.Add("On"); combo.Items.Add("Auto Upgrade"); }
                     else if (isUseScrGb) { combo.Items.Add("HDR10"); combo.Items.Add("scRGB"); }
+                    else if (isSettingsMode || isSwapChainCompat) { combo.Items.Add("Off"); combo.Items.Add("On"); }
                     else if (isOffsetRange) { for (int v = 0; v <= 5; v++) combo.Items.Add(v.ToString()); }
                     else if (isUnityBool) { combo.Items.Add("Off"); combo.Items.Add("On"); }
                     else { combo.Items.Add("Off"); combo.Items.Add("Output size"); combo.Items.Add("Output ratio"); combo.Items.Add("Any size"); }
 
                     int.TryParse(kv.Value, out var currentVal);
-                    combo.SelectedIndex = (isBinaryToggle || isSwapchainProxy || isSwapchainEncoding || isOffsetRange || isBlitCopyHack || isCopyDest || isUseScrGb)
+                    combo.SelectedIndex = (isBinaryToggle || isSwapchainProxy || isSwapchainEncoding || isOffsetRange || isBlitCopyHack || isCopyDest || isUseScrGb || isSettingsMode || isSwapChainCompat)
                         ? (currentVal >= 0 && currentVal < combo.Items.Count ? currentVal : 0)
                         : (currentVal >= 0 && currentVal <= 3 ? currentVal : 0);
 
