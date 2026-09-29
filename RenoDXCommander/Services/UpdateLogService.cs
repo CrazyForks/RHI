@@ -53,6 +53,13 @@ public class UpdateLogService : IUpdateLogService
     {
         lock (_lock)
         {
+            // Deduplicate: skip if the most recent entry for this component already has the same new version
+            var existing = _entries.FirstOrDefault(e =>
+                string.Equals(e.ComponentName, entry.ComponentName, StringComparison.OrdinalIgnoreCase));
+            if (existing != null &&
+                string.Equals(existing.NewVersion, entry.NewVersion, StringComparison.OrdinalIgnoreCase))
+                return;
+
             _entries.Insert(0, entry);
 
             // Trim to cap
