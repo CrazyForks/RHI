@@ -9,6 +9,7 @@
 - Unity games now show the ✓ or 🔨 status icon next to the installed addon, matching the behaviour for UE-Extended and named mod games.
 - Changing the global shader setting (Off / RHI Managed / Custom) in Settings now takes effect immediately across all games — no manual refresh needed.
 - The RenoDX ⚙ cog Compatibility Settings now show correct options for all keys. Blit Copy Hack shows Off / Auto / On / Scaling Only. Copy Destinations shows Off / On / Auto Upgrade. Swapchain Format (previously "Color Space") shows HDR10 / scRGB. Tonemap Offset and Scaling Offset show a 0–5 range. Proxy Revert State and Swapchain Compat are now exposed. Upgrade Path and Engine.ini settings (HDR and LUT) have moved into the UE-Extended Settings section alongside nits, with a vertical divider separating left and right columns.
+- Added PCGW link and install path support for The Witcher 3: Wild Hunt — Remastered.
 
 ### Bug Fixes
 
