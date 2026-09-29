@@ -594,10 +594,30 @@ public sealed partial class MainWindow
             topGridRow++;
         }
 
-        // ── Upgrade Path row (below nits, above Compatibility Settings) ───────
+        // ── Right column: Upgrade Path, HDR Settings, LUT ─────────────────────
+        // These sit in cols 2+3 of topGrid, alongside the left column items.
+        // A vertical divider Border spans all rows as a visual separator.
+        int rightGridRow = 0;
+        bool hasCustomEngineIniFile = AuxInstallService.GlobalManifest?.EngineIniFiles?.ContainsKey(card.GameName) == true;
+
+        // Add vertical divider spanning all rows (added after rows are defined, set RowSpan below)
+        var vertDivider = new Border
+        {
+            Width = 1,
+            Background = UIFactory.Brush(ResourceKeys.BorderDefaultBrush),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Margin = new Thickness(0),
+        };
+        Grid.SetColumn(vertDivider, 1);
+        Grid.SetRow(vertDivider, 0);
+        // RowSpan set after all rows are added
+
+        // ── Upgrade Path (right col row 0) ────────────────────────────────────
         if (iniExists && renodxSection != null && renodxSection.ContainsKey("Set_Path"))
         {
-            topGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            while (topGrid.RowDefinitions.Count <= rightGridRow)
+                topGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
             var upLabel = new TextBlock
             {
@@ -606,8 +626,8 @@ public sealed partial class MainWindow
                 Foreground = UIFactory.Brush(ResourceKeys.TextSecondaryBrush),
                 VerticalAlignment = VerticalAlignment.Center,
             };
-            Grid.SetRow(upLabel, topGridRow);
-            Grid.SetColumn(upLabel, 0);
+            Grid.SetRow(upLabel, rightGridRow);
+            Grid.SetColumn(upLabel, 2);
             topGrid.Children.Add(upLabel);
 
             var upCombo = new ComboBox { FontSize = 11, HorizontalAlignment = HorizontalAlignment.Stretch };
@@ -629,10 +649,131 @@ public sealed partial class MainWindow
                 }
                 catch (Exception ex) { card.ActionMessage = $"❌ {ex.Message}"; }
             };
-            Grid.SetRow(upCombo, topGridRow);
-            Grid.SetColumn(upCombo, 1);
+            Grid.SetRow(upCombo, rightGridRow);
+            Grid.SetColumn(upCombo, 3);
             topGrid.Children.Add(upCombo);
-            topGridRow++;
+            rightGridRow++;
+        }
+
+        // ── HDR Settings (right col, UE-Extended only) ────────────────────────
+        if (card.UseUeExtended && card.Status == GameStatus.Installed)
+        {
+            while (topGrid.RowDefinitions.Count <= rightGridRow)
+                topGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            var hdrLabel = new TextBlock
+            {
+                Text = "HDR Settings",
+                FontSize = 11,
+                Foreground = UIFactory.Brush(ResourceKeys.TextSecondaryBrush),
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            Grid.SetRow(hdrLabel, rightGridRow);
+            Grid.SetColumn(hdrLabel, 2);
+            topGrid.Children.Add(hdrLabel);
+
+            var hdrCombo = new ComboBox { FontSize = 11, HorizontalAlignment = HorizontalAlignment.Stretch };
+            hdrCombo.Items.Add("Off");
+            hdrCombo.Items.Add("On");
+            if (hasCustomEngineIniFile)
+            {
+                hdrCombo.IsEnabled = false;
+                hdrCombo.Opacity = 0.4;
+                ToolTipService.SetToolTip(hdrCombo, "Managed by custom Engine.ini file — not available for this game.");
+                hdrCombo.SelectedIndex = 0;
+            }
+            else
+            {
+                ToolTipService.SetToolTip(hdrCombo, "Deploys Engine.ini with HDR flags for games that don't have an ingame HDR option. Disable for SDR.");
+                bool hdrActive = card.InstalledRecord?.EngineIniHdr ?? true;
+                hdrCombo.SelectedIndex = hdrActive ? 1 : 0;
+                hdrCombo.SelectionChanged += (s, ev) =>
+                {
+                    if (hdrCombo.SelectedIndex == 1)
+                    {
+                        AuxInstallService.ApplyEngineIniHdrSettings(card.InstallPath, card.EngineIniProjectOverride, card.GameName, card.Source);
+                        if (card.InstalledRecord != null) card.InstalledRecord.EngineIniHdr = true;
+                        card.ActionMessage = "✅ Engine.ini HDR settings deployed.";
+                    }
+                    else
+                    {
+                        AuxInstallService.RemoveEngineIniHdrSettings(card.InstallPath, card.EngineIniProjectOverride, card.GameName, card.Source);
+                        if (card.InstalledRecord != null) card.InstalledRecord.EngineIniHdr = false;
+                        card.ActionMessage = "✅ Engine.ini HDR settings removed.";
+                    }
+                    if (card.InstalledRecord != null)
+                        App.Services.GetRequiredService<IModInstallService>().SaveRecordPublic(card.InstalledRecord);
+                    card.FadeMessage(m => card.ActionMessage = m, card.ActionMessage);
+                };
+            }
+            Grid.SetRow(hdrCombo, rightGridRow);
+            Grid.SetColumn(hdrCombo, 3);
+            topGrid.Children.Add(hdrCombo);
+            rightGridRow++;
+        }
+
+        // ── LUT Update Every Frame (right col, Unreal games with mod installed) ─
+        if (card.EngineHint?.Contains("Unreal") == true && card.Status == GameStatus.Installed)
+        {
+            while (topGrid.RowDefinitions.Count <= rightGridRow)
+                topGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            var lutLabel = new TextBlock
+            {
+                Text = "LUT Update Every Frame",
+                FontSize = 11,
+                Foreground = UIFactory.Brush(ResourceKeys.TextSecondaryBrush),
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            Grid.SetRow(lutLabel, rightGridRow);
+            Grid.SetColumn(lutLabel, 2);
+            topGrid.Children.Add(lutLabel);
+
+            var lutCombo = new ComboBox { FontSize = 11, HorizontalAlignment = HorizontalAlignment.Stretch };
+            lutCombo.Items.Add("Off");
+            lutCombo.Items.Add("On");
+            if (hasCustomEngineIniFile)
+            {
+                lutCombo.IsEnabled = false;
+                lutCombo.Opacity = 0.4;
+                ToolTipService.SetToolTip(lutCombo, "Managed by custom Engine.ini file — not available for this game.");
+                lutCombo.SelectedIndex = 0;
+            }
+            else
+            {
+                ToolTipService.SetToolTip(lutCombo, "Writes r.LUT.UpdateEveryFrame=1 to Engine.ini. Ensures the game recalculates LUTs each frame for accurate HDR color.");
+                bool lutActive = card.InstalledRecord?.EngineIniLut ?? true;
+                lutCombo.SelectedIndex = lutActive ? 1 : 0;
+                lutCombo.SelectionChanged += (s, ev) =>
+                {
+                    if (lutCombo.SelectedIndex == 1)
+                    {
+                        AuxInstallService.ApplyEngineIniLutSetting(card.InstallPath, card.EngineIniProjectOverride, card.GameName, card.Source);
+                        if (card.InstalledRecord != null) card.InstalledRecord.EngineIniLut = true;
+                        card.ActionMessage = "✅ LUT Update Every Frame enabled in Engine.ini.";
+                    }
+                    else
+                    {
+                        AuxInstallService.RemoveEngineIniLutSetting(card.InstallPath, card.EngineIniProjectOverride, card.GameName, card.Source);
+                        if (card.InstalledRecord != null) card.InstalledRecord.EngineIniLut = false;
+                        card.ActionMessage = "✅ LUT Update Every Frame removed from Engine.ini.";
+                    }
+                    if (card.InstalledRecord != null)
+                        App.Services.GetRequiredService<IModInstallService>().SaveRecordPublic(card.InstalledRecord);
+                    card.FadeMessage(m => card.ActionMessage = m, card.ActionMessage);
+                };
+            }
+            Grid.SetRow(lutCombo, rightGridRow);
+            Grid.SetColumn(lutCombo, 3);
+            topGrid.Children.Add(lutCombo);
+            rightGridRow++;
+        }
+
+        // Add vertical divider now that we know the total row count
+        if (rightGridRow > 0)
+        {
+            Grid.SetRowSpan(vertDivider, Math.Max(topGrid.RowDefinitions.Count, 1));
+            topGrid.Children.Add(vertDivider);
         }
 
         content.Children.Add(topGrid);
@@ -860,149 +1001,6 @@ public sealed partial class MainWindow
                 Foreground = UIFactory.Brush(ResourceKeys.TextSecondaryBrush),
                 FontStyle = Windows.UI.Text.FontStyle.Italic,
             });
-        }
-
-        // ── Engine.ini Settings (only for Unreal Engine games) ────────────────
-        if (card.EngineHint?.Contains("Unreal") == true && card.Status == GameStatus.Installed)
-        {
-            content.Children.Add(new Border { Height = 1, Background = UIFactory.Brush(ResourceKeys.BorderDefaultBrush), Margin = new Thickness(0, 10, 0, 2) });
-            content.Children.Add(new TextBlock
-            {
-                Text = "Engine.ini Settings",
-                FontSize = 13,
-                Foreground = UIFactory.Brush(ResourceKeys.TextPrimaryBrush),
-                Margin = new Thickness(0, 4, 0, 0),
-            });
-
-            var engineIniGrid = new Grid { ColumnSpacing = 12, RowSpacing = 6 };
-            engineIniGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            engineIniGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110, GridUnitType.Pixel) });
-            engineIniGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            engineIniGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110, GridUnitType.Pixel) });
-            engineIniGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-            // Check if a custom Engine.ini file is managing this game's settings
-            bool hasCustomEngineIniFile = AuxInstallService.GlobalManifest?.EngineIniFiles?.ContainsKey(card.GameName) == true;
-
-            // HDR Settings toggle (only for UE-Extended games)
-            if (card.UseUeExtended)
-            {
-                var hdrLabel = new TextBlock
-                {
-                    Text = "HDR Settings",
-                    FontSize = 11,
-                    Foreground = UIFactory.Brush(ResourceKeys.TextSecondaryBrush),
-                    VerticalAlignment = VerticalAlignment.Center,
-                };
-                Grid.SetRow(hdrLabel, 0);
-                Grid.SetColumn(hdrLabel, 0);
-                engineIniGrid.Children.Add(hdrLabel);
-
-                var hdrCombo = new ComboBox { FontSize = 11, MinWidth = 100, HorizontalAlignment = HorizontalAlignment.Stretch };
-                hdrCombo.Items.Add("Off");
-                hdrCombo.Items.Add("On");
-                if (hasCustomEngineIniFile)
-                {
-                    hdrCombo.IsEnabled = false;
-                    hdrCombo.Opacity = 0.4;
-                    ToolTipService.SetToolTip(hdrCombo, "Managed by custom Engine.ini file — not available for this game.");
-                    hdrCombo.SelectedIndex = 0;
-                }
-                else
-                {
-                    ToolTipService.SetToolTip(hdrCombo, "Deploys Engine.ini with HDR flags for games that don't have an ingame HDR option. Disable for SDR.");
-                    bool hdrActive = card.InstalledRecord?.EngineIniHdr ?? true;
-                    hdrCombo.SelectedIndex = hdrActive ? 1 : 0;
-                    hdrCombo.SelectionChanged += (s, ev) =>
-                    {
-                        if (hdrCombo.SelectedIndex == 1)
-                        {
-                            AuxInstallService.ApplyEngineIniHdrSettings(card.InstallPath, card.EngineIniProjectOverride, card.GameName, card.Source);
-                            if (card.InstalledRecord != null) card.InstalledRecord.EngineIniHdr = true;
-                            card.ActionMessage = "✅ Engine.ini HDR settings deployed.";
-                        }
-                        else
-                        {
-                            AuxInstallService.RemoveEngineIniHdrSettings(card.InstallPath, card.EngineIniProjectOverride, card.GameName, card.Source);
-                            if (card.InstalledRecord != null) card.InstalledRecord.EngineIniHdr = false;
-                            card.ActionMessage = "✅ Engine.ini HDR settings removed.";
-                        }
-                        if (card.InstalledRecord != null)
-                            App.Services.GetRequiredService<IModInstallService>().SaveRecordPublic(card.InstalledRecord);
-                        card.FadeMessage(m => card.ActionMessage = m, card.ActionMessage);
-                    };
-                }
-                Grid.SetRow(hdrCombo, 0);
-                Grid.SetColumn(hdrCombo, 1);
-                engineIniGrid.Children.Add(hdrCombo);
-            }
-
-            // LUT Update Every Frame toggle
-            int lutCol = card.UseUeExtended ? 2 : 0;
-            var lutLabel = new TextBlock
-            {
-                Text = "LUT Update Every Frame",
-                FontSize = 11,
-                Foreground = UIFactory.Brush(ResourceKeys.TextSecondaryBrush),
-                VerticalAlignment = VerticalAlignment.Center,
-            };
-            Grid.SetRow(lutLabel, 0);
-            Grid.SetColumn(lutLabel, lutCol);
-            engineIniGrid.Children.Add(lutLabel);
-
-            var lutCombo = new ComboBox { FontSize = 11, MinWidth = 100, HorizontalAlignment = HorizontalAlignment.Stretch };
-            lutCombo.Items.Add("Off");
-            lutCombo.Items.Add("On");
-            if (hasCustomEngineIniFile)
-            {
-                lutCombo.IsEnabled = false;
-                lutCombo.Opacity = 0.4;
-                ToolTipService.SetToolTip(lutCombo, "Managed by custom Engine.ini file — not available for this game.");
-                lutCombo.SelectedIndex = 0;
-            }
-            else
-            {
-                ToolTipService.SetToolTip(lutCombo, "Writes r.LUT.UpdateEveryFrame=1 to Engine.ini. Ensures the game recalculates LUTs each frame for accurate HDR color.");
-                bool lutActive = card.InstalledRecord?.EngineIniLut ?? true;
-                lutCombo.SelectedIndex = lutActive ? 1 : 0;
-                lutCombo.SelectionChanged += (s, ev) =>
-                {
-                    if (lutCombo.SelectedIndex == 1)
-                    {
-                        AuxInstallService.ApplyEngineIniLutSetting(card.InstallPath, card.EngineIniProjectOverride, card.GameName, card.Source);
-                        if (card.InstalledRecord != null) card.InstalledRecord.EngineIniLut = true;
-                        card.ActionMessage = "✅ LUT Update Every Frame enabled in Engine.ini.";
-                    }
-                    else
-                    {
-                        AuxInstallService.RemoveEngineIniLutSetting(card.InstallPath, card.EngineIniProjectOverride, card.GameName, card.Source);
-                        if (card.InstalledRecord != null) card.InstalledRecord.EngineIniLut = false;
-                        card.ActionMessage = "✅ LUT Update Every Frame removed from Engine.ini.";
-                    }
-                    if (card.InstalledRecord != null)
-                        App.Services.GetRequiredService<IModInstallService>().SaveRecordPublic(card.InstalledRecord);
-                    card.FadeMessage(m => card.ActionMessage = m, card.ActionMessage);
-                };
-            }
-            Grid.SetRow(lutCombo, 0);
-            Grid.SetColumn(lutCombo, lutCol + 1);
-            engineIniGrid.Children.Add(lutCombo);
-
-            content.Children.Add(engineIniGrid);
-
-            // Note when a custom file is managing Engine.ini
-            if (hasCustomEngineIniFile)
-            {
-                var customNote = new TextBlock
-                {
-                    Text = "Engine.ini managed by custom file — standard controls disabled.",
-                    FontSize = 10,
-                    Foreground = UIFactory.Brush(ResourceKeys.TextTertiaryBrush),
-                    TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness(0, 2, 0, 0),
-                };
-                content.Children.Add(customNote);
-            }
         }
 
         // ── Preset Export/Import buttons (side by side) ───────────────────────
