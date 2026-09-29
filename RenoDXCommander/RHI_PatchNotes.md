@@ -1,3 +1,13 @@
+## v2.8.0 Beta
+
+### Bug Fixes
+
+**UI**
+- Fixed the UI freezing for 30–60 seconds after clicking Check for Updates when a game with a large NVIDIA driver profile (e.g. Mass Effect Andromeda) was selected. The NVIDIA profile panel now skips its rebuild while the Settings panel is open, since it isn't visible and the expensive layout work is pointless.
+- Fixed the UI freezing during the app update download when a game with DLSS SR+FG+Streamline (e.g. God of War Ragnarök) was selected. The NVIDIA profile and Neural Rendering panels now skip their rebuild while any dialog is open — the user is looking at the dialog, not the game panel.
+
+---
+
 ## v2.7.9
 
 ### New
@@ -12,10 +22,6 @@
 - The RenoDX ⚙ cog Compatibility Settings now show correct named options for every key — Blit Copy Hack, Copy Destinations, Swapchain Format, Tonemap/Scaling Offset, Proxy Revert State, and Swapchain Compat. Upgrade Path and Engine.ini HDR/LUT settings have moved into the UE-Extended Settings section alongside nits, with a vertical divider between the two columns.
 
 ### Bug Fixes
-
-**UI**
-- Fixed the UI freezing for 30–60 seconds after clicking Check for Updates when a game with a large NVIDIA driver profile (e.g. Mass Effect Andromeda) was selected. The NVIDIA profile panel now skips its rebuild while the Settings panel is open, since it isn't visible and the expensive layout work is pointless.
-- Fixed the UI freezing during the app update download when a game with DLSS SR+FG+Streamline (e.g. God of War Ragnarök) was selected. The NVIDIA profile and Neural Rendering panels now skip their rebuild while any dialog is open — the user is looking at the dialog, not the game panel.
 
 **Shaders**
 - Fixed the global shader "Off" setting overriding per-game shader overrides. Games with a per-game Custom or Select override now receive their configured shaders even when the global setting is Off. Games with no override continue to inherit the Off setting as before.
