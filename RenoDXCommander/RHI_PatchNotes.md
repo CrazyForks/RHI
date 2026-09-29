@@ -1,5 +1,8 @@
 ## v2.8.0 Beta
 
+### New
+- **NVIDIA panel split** — the "Nvidia Profile Overrides" section is now two independent panels: **DLSS / Streamline** (SR, RR, FG, SL versions and presets) and **Driver Settings** (VSync, Low Latency, Smooth Motion, Power/G-Sync, ReBAR). Each has its own collapse/expand, drag handle for reordering, and collapsed summary line. Each remembers its own collapsed state. Users who had the old section's position saved will see both new sections in that location automatically.
+
 ### Bug Fixes
 
 **UI**

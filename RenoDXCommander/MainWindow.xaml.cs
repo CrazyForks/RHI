@@ -618,7 +618,8 @@ public sealed partial class MainWindow : Window
                                 _crashReporter?.Log($"[SelectionDebounce] BuildOverridesPanel done: '{target.GameName}'");
                                 if (OverridesContainer.Visibility != Visibility.Visible)        OverridesContainer.Visibility = Visibility.Visible;
                                 if (NeuralRenderingContainer.Visibility != Visibility.Visible)  NeuralRenderingContainer.Visibility = Visibility.Visible;
-                                if (NvidiaProfileContainer.Visibility != Visibility.Visible)    NvidiaProfileContainer.Visibility = Visibility.Visible;
+                                if (NvidiaProfileDlssContainer.Visibility != Visibility.Visible)   NvidiaProfileDlssContainer.Visibility = Visibility.Visible;
+                                if (NvidiaProfileDriverContainer.Visibility != Visibility.Visible) NvidiaProfileDriverContainer.Visibility = Visibility.Visible;
                                 if (ManagementContainer.Visibility != Visibility.Visible)       ManagementContainer.Visibility = Visibility.Visible;
                                 _detailPanelBuilder.ApplySectionOrder();
                                 _crashReporter?.Log($"[SelectionDebounce] ApplySectionOrder done: '{target.GameName}'");
@@ -636,8 +637,10 @@ public sealed partial class MainWindow : Window
             OverridesContainer.Visibility = Visibility.Collapsed;
             NeuralRenderingPanel.Children.Clear();
             NeuralRenderingContainer.Visibility = Visibility.Collapsed;
-            NvidiaProfilePanel.Children.Clear();
-            NvidiaProfileContainer.Visibility = Visibility.Collapsed;
+            NvidiaProfileDlssPanel.Children.Clear();
+            NvidiaProfileDlssContainer.Visibility = Visibility.Collapsed;
+            NvidiaProfileDriverPanel.Children.Clear();
+            NvidiaProfileDriverContainer.Visibility = Visibility.Collapsed;
             ManagementPanel.Children.Clear();
             ManagementContainer.Visibility = Visibility.Collapsed;
             ExtrasPanel.Children.Clear();

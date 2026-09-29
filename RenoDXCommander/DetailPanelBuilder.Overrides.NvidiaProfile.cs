@@ -1,4 +1,4 @@
-// DetailPanelBuilder.Overrides.NvidiaProfile.cs — Nvidia Profile Overrides header + DLSS/Streamline section.
+// DetailPanelBuilder.Overrides.NvidiaProfile.cs — DLSS / Streamline section (independent panel).
 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -13,46 +13,45 @@ public partial class DetailPanelBuilder
     internal void BuildNvidiaProfileSection(GameCardViewModel card, string capturedName)
     {
         // ══════════════════════════════════════════════════════════════════════
-        // Nvidia Profile Overrides — separate section below Overrides
-        // DLSS / Streamline / ReBAR + future additions
+        // DLSS / Streamline — independent collapsible section
         // ══════════════════════════════════════════════════════════════════════
 
-        _window.NvidiaProfilePanel.Children.Clear();
+        _window.NvidiaProfileDlssPanel.Children.Clear();
 
         // ── Collapsible header ────────────────────────────────────────────────
-        const string nvSectionKey = "NvidiaProfile";
+        const string nvSectionKey = "NvidiaProfileDlss";
         var nvSettings   = _window.ViewModel.Settings;
         bool nvCollapsed = nvSettings.CollapsedDetailSections.Contains(nvSectionKey);
 
-        var nvidiaHeaderText = "Nvidia Profile Overrides";
         var driverVer = _dlssPresetService.DriverVersionString;
-        if (!string.IsNullOrEmpty(driverVer))
-            nvidiaHeaderText += $" — Driver {driverVer}";
+        var headerText = string.IsNullOrEmpty(driverVer)
+            ? "DLSS / Streamline"
+            : $"DLSS / Streamline — Driver {driverVer}";
 
         var nvArrow = new TextBlock
         {
-            Text      = nvCollapsed ? "▶" : "▼",
-            FontSize  = 10,
-            Foreground = UIFactory.Brush(ResourceKeys.TextTertiaryBrush),
+            Text              = nvCollapsed ? "▶" : "▼",
+            FontSize          = 10,
+            Foreground        = UIFactory.Brush(ResourceKeys.TextTertiaryBrush),
             VerticalAlignment = VerticalAlignment.Center,
-            Margin    = new Thickness(0, 0, 6, 0),
+            Margin            = new Thickness(0, 0, 6, 0),
         };
         var nvTitle = new TextBlock
         {
-            Text       = nvidiaHeaderText,
-            FontSize   = 13,
-            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-            Foreground = UIFactory.Brush(ResourceKeys.TextPrimaryBrush),
+            Text              = headerText,
+            FontSize          = 13,
+            FontWeight        = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground        = UIFactory.Brush(ResourceKeys.TextPrimaryBrush),
             VerticalAlignment = VerticalAlignment.Center,
         };
         var nvHeaderRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 0 };
-        nvHeaderRow.Children.Add(MakeDragHandle(_window.NvidiaProfileContainer));
+        nvHeaderRow.Children.Add(MakeDragHandle(_window.NvidiaProfileDlssContainer));
         nvHeaderRow.Children.Add(nvArrow);
         nvHeaderRow.Children.Add(nvTitle);
-        _window.NvidiaProfilePanel.Children.Add(nvHeaderRow);
+        _window.NvidiaProfileDlssPanel.Children.Add(nvHeaderRow);
 
         var nvBody = new StackPanel { Spacing = 6, Visibility = nvCollapsed ? Visibility.Collapsed : Visibility.Visible };
-        _window.NvidiaProfilePanel.Children.Add(nvBody);
+        _window.NvidiaProfileDlssPanel.Children.Add(nvBody);
 
         nvHeaderRow.PointerEntered += (s, e) => nvTitle.Foreground = UIFactory.Brush(ResourceKeys.AccentTealBrush);
         nvHeaderRow.PointerExited  += (s, e) => nvTitle.Foreground = UIFactory.Brush(ResourceKeys.TextPrimaryBrush);
@@ -62,15 +61,12 @@ public partial class DetailPanelBuilder
         nvHeaderRow.PointerEntered += (s, e) => nvCursorProp?.SetValue(nvHeaderRow, nvHandCursor);
         nvHeaderRow.PointerExited  += (s, e) => nvCursorProp?.SetValue(nvHeaderRow, nvArrowCursor);
 
-        // Placeholder for the collapsed summary — populated by BuildNvidiaProfileBody after the scan
-        // The toggle handler reads index 3 from _nvHeaderRow so it always gets the live TextBlock.
-
         nvHeaderRow.PointerPressed += (s, e) =>
         {
             bool nowCollapsed = nvBody.Visibility == Visibility.Visible;
             nvBody.Visibility = nowCollapsed ? Visibility.Collapsed : Visibility.Visible;
             nvArrow.Text = nowCollapsed ? "▶" : "▼";
-            // Show/hide the summary TextBlock at index 3 (appended by BuildNvidiaProfileBody)
+            // Show/hide summary TextBlock at index 3 (appended by BuildNvidiaProfileBody)
             if (_nvHeaderRow != null && _nvHeaderRow.Children.Count > 3
                 && _nvHeaderRow.Children[3] is TextBlock nvSummaryTb)
                 nvSummaryTb.Visibility = nowCollapsed ? Visibility.Visible : Visibility.Collapsed;
@@ -79,14 +75,14 @@ public partial class DetailPanelBuilder
             _window.ViewModel.SaveSettingsPublic();
         };
 
-        // Store header row + collapsed flag so BuildNvidiaProfileBody can append/update the summary
+        // Store header row so BuildNvidiaProfileBody can append/update the summary
         _nvHeaderRow = nvHeaderRow;
 
-        // Store the body panel so BuildDriverProfileSection can append to it
-        _nvBodyPanel = nvBody;
+        // _nvBodyPanel is no longer used by BuildDriverProfileSection (it now owns its own panel)
+        _nvBodyPanel = null;
 
-        // Capture card state before the immediate render and the background scan
-        var gameName   = card.GameName;
+        // Capture card state before the background scan
+        var gameName    = card.GameName;
         var installPath = card.InstallPath ?? "";
         var gameSource  = card.Source ?? "";
         var hasAnyDlss  = card.HasAnyDlssStreamline;
@@ -97,17 +93,14 @@ public partial class DetailPanelBuilder
         var hasDlssnr   = card.HasDlssnr;
         var capturedCard = card;
 
-        // Dedicated slot for the DLSS rows — lets the TryEnqueue replace only DLSS content
-        // without touching driverContainer (which BuildDriverProfileSection appends after us).
+        // Dedicated slot for the DLSS rows (atomic swap)
         var dlssContainer = new StackPanel { Spacing = nvBody.Spacing };
         nvBody.Children.Add(dlssContainer);
 
-        // Fetch all NVAPI/preset values off the UI thread, then build the body on dispatcher
+        // Fetch NVAPI/preset values off the UI thread, then build body on dispatcher
         var scanToken = _panelScanCts.Token;
         _ = Task.Run(async () =>
         {
-            // Skip if the user navigated away before we even acquire the semaphore —
-            // the cached render is already showing; no need to do the NVAPI scan.
             if (_window.ViewModel.SelectedGame?.GameName.Equals(gameName, StringComparison.OrdinalIgnoreCase) != true
                 || _window.ViewModel.SelectedGame?.Source != gameSource)
                 return;
@@ -122,13 +115,10 @@ public partial class DetailPanelBuilder
                 if (hasAnyDlss && _dlssPresetService.IsSupported)
                 {
                     var svc = _dlssPresetService;
-                    // Use a 4s cancellation token for the exe scan inside FindProfile.
                     using var scanCts = new CancellationTokenSource(TimeSpan.FromSeconds(4));
                     var scanCt = scanCts.Token;
-                    // Wrap NVAPI reads in a timeout — they can hang indefinitely after sleep/wake
                     var nvapiTask = Task.Run(() =>
                     {
-                        // Prime the profile cache so all subsequent Get* calls hit the in-memory cache.
                         svc.PrimeProfileCache(gameName, installPath, scanCt);
                         return new DlssProfileData(
                             SrDriverOverride: svc.IsSrDriverOverrideActive(gameName, installPath),
@@ -146,7 +136,7 @@ public partial class DetailPanelBuilder
                     using var delayCts = new CancellationTokenSource();
                     var delayTask = Task.Delay(5000, delayCts.Token);
                     var completed = await Task.WhenAny(nvapiTask, delayTask).ConfigureAwait(false);
-                    delayCts.Cancel(); // cancel the delay timer so it doesn't hold a thread pool thread
+                    delayCts.Cancel();
                     if (completed == nvapiTask)
                         dlssData = await nvapiTask.ConfigureAwait(false);
                     else
@@ -161,20 +151,18 @@ public partial class DetailPanelBuilder
 
             _window.DispatcherQueue?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
             {
-                // Bail if a newer BuildNvidiaProfileSection call has started (e.g. user changed a preset)
                 if (scanToken.IsCancellationRequested) return;
+                if (_window.SettingsPanel.Visibility == Microsoft.UI.Xaml.Visibility.Visible || DialogService.IsDialogOpen) return;
 
-                // Guard: bail if the user navigated away
                 var current = _window.ViewModel.SelectedGame;
                 if (current == null || !current.GameName.Equals(gameName, StringComparison.OrdinalIgnoreCase)
                     || current.Source != gameSource)
                     return;
 
                 var sw = System.Diagnostics.Stopwatch.StartNew();
-
                 _window.ViewModel.SetLastUiAction($"BuildNvidiaProfileBody({gameName})");
                 CrashReporter.Log($"[BuildNvidiaProfileBody] Starting UI build for '{gameName}' hasDlss={hasDlss} hasDlssd={hasDlssd} hasDlssg={hasDlssg} hasDlssnr={hasDlssnr} hasStreamline={hasStreamline}");
-                // Update card cached driver override flags so the collapsed summary shows "NV Override"
+
                 if (dlssData != null)
                 {
                     capturedCard.CachedSrDriverOverride = dlssData.SrDriverOverride;
@@ -183,9 +171,8 @@ public partial class DetailPanelBuilder
                     capturedCard.CachedNrDriverOverride = dlssData.NrDriverOverride;
                 }
 
-                // Build into a throwaway container first, then swap atomically.
                 var tempBody = new StackPanel { Spacing = dlssContainer.Spacing };
-                var dlssAvailW = dlssContainer.ActualWidth > 0 ? dlssContainer.ActualWidth : _window.NvidiaProfilePanel.ActualWidth;
+                var dlssAvailW = dlssContainer.ActualWidth > 0 ? dlssContainer.ActualWidth : _window.NvidiaProfileDlssPanel.ActualWidth;
                 BuildNvidiaProfileBody(capturedCard, capturedName, tempBody, dlssData,
                     hasDlss, hasDlssd, hasDlssg, hasStreamline, hasDlssnr, dlssAvailW);
                 dlssContainer.Children.Clear();
@@ -857,8 +844,7 @@ public partial class DetailPanelBuilder
             nvBody.Children.Add(dlssRowGrid);
         }
 
-        CrashReporter.Log($"[BuildNvidiaProfileBody] DLSS grid built for '{card.GameName}', calling BuildDriverProfileSection");
-        BuildDriverProfileSection(card, capturedName);
+        CrashReporter.Log($"[BuildNvidiaProfileBody] DLSS grid built for '{card.GameName}'");
 
         // ── Update collapsed summary now that DLSS versions are known ─────────
         // Remove any stale summary TextBlocks (index > 2: drag handle + arrow + title = indices 0-2)
@@ -883,7 +869,7 @@ public partial class DetailPanelBuilder
             if (nvSummaryTb != null)
             {
                 var nvCollapsed = _window.ViewModel.Settings.CollapsedDetailSections
-                    .Contains("NvidiaProfile");
+                    .Contains("NvidiaProfileDlss");
                 nvSummaryTb.Visibility = nvCollapsed ? Visibility.Visible : Visibility.Collapsed;
                 _nvHeaderRow.Children.Add(nvSummaryTb);
             }
