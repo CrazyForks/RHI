@@ -445,10 +445,11 @@ public sealed partial class MainWindow
             });
         }
         var topGrid = new Grid { ColumnSpacing = 12, RowSpacing = 6 };
-        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110, GridUnitType.Pixel) });
-        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110, GridUnitType.Pixel) });
+        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });  // 0: left label
+        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110, GridUnitType.Pixel) }); // 1: left combo
+        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Pixel) });  // 2: vertical divider
+        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });  // 3: right label
+        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110, GridUnitType.Pixel) }); // 4: right combo
         int topGridRow = 0;
 
         if (card.UeExtendedToggleVisibility == Visibility.Visible)
@@ -589,7 +590,6 @@ public sealed partial class MainWindow
             nitsInputPanel.Children.Add(autoBtn);
             Grid.SetRow(nitsInputPanel, topGridRow);
             Grid.SetColumn(nitsInputPanel, 1);
-            Grid.SetColumnSpan(nitsInputPanel, 3);
             topGrid.Children.Add(nitsInputPanel);
             topGridRow++;
         }
@@ -609,7 +609,7 @@ public sealed partial class MainWindow
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(0),
         };
-        Grid.SetColumn(vertDivider, 1);
+        Grid.SetColumn(vertDivider, 2);
         Grid.SetRow(vertDivider, 0);
         // RowSpan set after all rows are added
 
@@ -627,7 +627,7 @@ public sealed partial class MainWindow
                 VerticalAlignment = VerticalAlignment.Center,
             };
             Grid.SetRow(upLabel, rightGridRow);
-            Grid.SetColumn(upLabel, 2);
+            Grid.SetColumn(upLabel, 3);
             topGrid.Children.Add(upLabel);
 
             var upCombo = new ComboBox { FontSize = 11, HorizontalAlignment = HorizontalAlignment.Stretch };
@@ -650,7 +650,7 @@ public sealed partial class MainWindow
                 catch (Exception ex) { card.ActionMessage = $"❌ {ex.Message}"; }
             };
             Grid.SetRow(upCombo, rightGridRow);
-            Grid.SetColumn(upCombo, 3);
+            Grid.SetColumn(upCombo, 4);
             topGrid.Children.Add(upCombo);
             rightGridRow++;
         }
@@ -669,7 +669,7 @@ public sealed partial class MainWindow
                 VerticalAlignment = VerticalAlignment.Center,
             };
             Grid.SetRow(hdrLabel, rightGridRow);
-            Grid.SetColumn(hdrLabel, 2);
+            Grid.SetColumn(hdrLabel, 3);
             topGrid.Children.Add(hdrLabel);
 
             var hdrCombo = new ComboBox { FontSize = 11, HorizontalAlignment = HorizontalAlignment.Stretch };
@@ -707,7 +707,7 @@ public sealed partial class MainWindow
                 };
             }
             Grid.SetRow(hdrCombo, rightGridRow);
-            Grid.SetColumn(hdrCombo, 3);
+            Grid.SetColumn(hdrCombo, 4);
             topGrid.Children.Add(hdrCombo);
             rightGridRow++;
         }
@@ -726,7 +726,7 @@ public sealed partial class MainWindow
                 VerticalAlignment = VerticalAlignment.Center,
             };
             Grid.SetRow(lutLabel, rightGridRow);
-            Grid.SetColumn(lutLabel, 2);
+            Grid.SetColumn(lutLabel, 3);
             topGrid.Children.Add(lutLabel);
 
             var lutCombo = new ComboBox { FontSize = 11, HorizontalAlignment = HorizontalAlignment.Stretch };
@@ -764,7 +764,7 @@ public sealed partial class MainWindow
                 };
             }
             Grid.SetRow(lutCombo, rightGridRow);
-            Grid.SetColumn(lutCombo, 3);
+            Grid.SetColumn(lutCombo, 4);
             topGrid.Children.Add(lutCombo);
             rightGridRow++;
         }
