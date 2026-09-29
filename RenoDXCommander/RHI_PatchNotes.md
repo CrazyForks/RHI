@@ -5,6 +5,7 @@
 **UI**
 - Fixed the UI freezing for 30–60 seconds after clicking Check for Updates when a game with a large NVIDIA driver profile (e.g. Mass Effect Andromeda) was selected. The NVIDIA profile panel now skips its rebuild while the Settings panel is open, since it isn't visible and the expensive layout work is pointless.
 - Fixed the UI freezing during the app update download when a game with DLSS SR+FG+Streamline (e.g. God of War Ragnarök) was selected. The NVIDIA profile and Neural Rendering panels now skip their rebuild while any dialog is open — the user is looking at the dialog, not the game panel.
+- **Partial fix** for the UI freezing when clicking on games with a full DLSS install (SR+RR+FG+Streamline, e.g. Control, Resident Evil 4). The freeze during Settings and app update scenarios is resolved; the freeze on direct game selection is a known remaining issue being tracked for a structural fix in a future release.
 
 ---
 
