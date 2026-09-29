@@ -13,6 +13,9 @@
 
 ### Bug Fixes
 
+**UI**
+- Fixed the UI freezing for 30–60 seconds after clicking Check for Updates when a game with a large NVIDIA driver profile (e.g. Mass Effect Andromeda) was selected. The NVIDIA profile panel now skips its rebuild while the Settings panel is open, since it isn't visible and the expensive layout work is pointless.
+
 **Shaders**
 - Fixed the global shader "Off" setting overriding per-game shader overrides. Games with a per-game Custom or Select override now receive their configured shaders even when the global setting is Off. Games with no override continue to inherit the Off setting as before.
 - Fixed custom shader files being auto-ticked when selecting built-in shader packs. The dependency scanner was matching standard ReShade headers against copies in the user's custom folder.

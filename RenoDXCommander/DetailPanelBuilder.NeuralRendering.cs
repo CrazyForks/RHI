@@ -86,6 +86,9 @@ public partial class DetailPanelBuilder
 
             _window.DispatcherQueue?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
             {
+                // Guard: Settings panel open — don't touch the live tree while it's hidden
+                if (_window.SettingsPanel.Visibility == Microsoft.UI.Xaml.Visibility.Visible) return;
+
                 _window.ViewModel.SetLastUiAction($"BuildNeuralRenderingSectionWithData({card.GameName})");
                 var __sw = System.Diagnostics.Stopwatch.StartNew();
                 BuildNeuralRenderingSectionWithData(card, dlss5Installed, sfInstalled,
