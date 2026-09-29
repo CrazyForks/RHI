@@ -115,6 +115,7 @@ public class UnrealEntry : INotifyPropertyChanged
         "Swapchain_Encoding",
         "SettingsMode",
         "Blit_Copy_Hack",
+        "Proxy_Revert_State",
         "Tonemap_Offset",
         "Scaling_Offset",
     ];
