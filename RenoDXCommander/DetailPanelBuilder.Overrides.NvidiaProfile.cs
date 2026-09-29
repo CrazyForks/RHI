@@ -24,9 +24,7 @@ public partial class DetailPanelBuilder
         bool nvCollapsed = nvSettings.CollapsedDetailSections.Contains(nvSectionKey);
 
         var driverVer = _dlssPresetService.DriverVersionString;
-        var headerText = string.IsNullOrEmpty(driverVer)
-            ? "DLSS / Streamline"
-            : $"DLSS / Streamline — Driver {driverVer}";
+        var headerText = "DLSS / Streamline";
 
         var nvArrow = new TextBlock
         {

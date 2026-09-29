@@ -46,6 +46,11 @@ public partial class DetailPanelBuilder
         var driverSettings  = _window.ViewModel.Settings;
         bool driverCollapsed = driverSettings.CollapsedDetailSections.Contains(driverSectionKey);
 
+        var driverVer = _dlssPresetService.DriverVersionString;
+        var driverHeaderText = string.IsNullOrEmpty(driverVer)
+            ? "Driver Settings"
+            : $"Driver Settings — Driver {driverVer}";
+
         var driverArrow = new TextBlock
         {
             Text              = driverCollapsed ? "▶" : "▼",
@@ -56,7 +61,7 @@ public partial class DetailPanelBuilder
         };
         var driverTitle = new TextBlock
         {
-            Text              = "Driver Settings",
+            Text              = driverHeaderText,
             FontSize          = 13,
             FontWeight        = Microsoft.UI.Text.FontWeights.SemiBold,
             Foreground        = UIFactory.Brush(ResourceKeys.TextPrimaryBrush),
