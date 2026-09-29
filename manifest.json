@@ -1481,21 +1481,6 @@
     }
   },
   "renodxExtraSettings": [
-    {
-      "key": "Upgrade_CopyDestinations",
-      "label": "Upgrade Copy Destinations",
-      "default": "0",
-      "options": [
-        {
-          "value": "0",
-          "name": "Off"
-        },
-        {
-          "value": "1",
-          "name": "On"
-        }
-      ]
-    }
   ],
   "dlssPresetsDev": {
     "sr": [
