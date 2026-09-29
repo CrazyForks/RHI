@@ -656,12 +656,12 @@ public sealed partial class MainWindow
                     bool isUnityBool = kv.Key.Equals("Force_Pipeline_Cloning", StringComparison.OrdinalIgnoreCase)
                                     || kv.Key.Equals("ForceBorderless",        StringComparison.OrdinalIgnoreCase)
                                     || kv.Key.Equals("PreventFullscreen",      StringComparison.OrdinalIgnoreCase)
-                                    || kv.Key.Equals("Blit_Copy_Hack",         StringComparison.OrdinalIgnoreCase)
                                     || kv.Key.Equals("Use_Resource_Cloning",   StringComparison.OrdinalIgnoreCase)
                                     || kv.Key.Equals("Upgrade_CopyDestinations", StringComparison.OrdinalIgnoreCase)
                                     || kv.Key.Equals("Upgrade_UseSCRGB",       StringComparison.OrdinalIgnoreCase);
                     bool isOffsetRange = kv.Key.Equals("Tonemap_Offset",       StringComparison.OrdinalIgnoreCase)
                                       || kv.Key.Equals("Scaling_Offset",       StringComparison.OrdinalIgnoreCase);
+                    bool isBlitCopyHack = kv.Key.Equals("Blit_Copy_Hack",      StringComparison.OrdinalIgnoreCase);
                     bool isBinaryToggle = isSetPath || isDumpLut || isUnityBool;
 
                     // Label text
@@ -688,12 +688,13 @@ public sealed partial class MainWindow
                     else if (isDumpLut) { combo.Items.Add("Off"); combo.Items.Add("On"); }
                     else if (isSwapchainProxy) { combo.Items.Add("Off"); combo.Items.Add("On"); combo.Items.Add("On (Compat)"); }
                     else if (isSwapchainEncoding) { combo.Items.Add("Linear"); combo.Items.Add("Gamma"); }
+                    else if (isBlitCopyHack) { combo.Items.Add("Off"); combo.Items.Add("Auto"); combo.Items.Add("On"); combo.Items.Add("Scaling Only"); }
                     else if (isOffsetRange) { for (int v = 0; v <= 5; v++) combo.Items.Add(v.ToString()); }
                     else if (isUnityBool) { combo.Items.Add("Off"); combo.Items.Add("On"); }
                     else { combo.Items.Add("Off"); combo.Items.Add("Output size"); combo.Items.Add("Output ratio"); combo.Items.Add("Any size"); }
 
                     int.TryParse(kv.Value, out var currentVal);
-                    combo.SelectedIndex = (isBinaryToggle || isSwapchainProxy || isSwapchainEncoding || isOffsetRange)
+                    combo.SelectedIndex = (isBinaryToggle || isSwapchainProxy || isSwapchainEncoding || isOffsetRange || isBlitCopyHack)
                         ? (currentVal >= 0 && currentVal < combo.Items.Count ? currentVal : 0)
                         : (currentVal >= 0 && currentVal <= 3 ? currentVal : 0);
 
