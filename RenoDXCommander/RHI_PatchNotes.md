@@ -1,8 +1,8 @@
 ## v2.7.9 beta
 
 ### New
-- **DLSS Tool ZZZ Load Order** — a new toggle in the Neural Rendering section (DLSS Tool method only) lets you deploy the DLSS Tool addon as `zzz_renodx-dlss.addon64` so it loads last in the ReShade addon order. Toggling On or Off renames the file on disk immediately. RHI recognises both filenames as the same addon — tracking, auto-update, and version swapping all work seamlessly with either name.
 - **Unity game-specific settings** — RHI now writes the correct per-game INI settings when you install a RenoDX mod for a Unity engine game. Render target upgrades, swapchain format, and other compatibility keys are applied automatically based on the RHI database, with no manual configuration needed.
+- **DLSS Tool ZZZ Load Order** — a new toggle in the Neural Rendering section (DLSS Tool method only) lets you deploy the DLSS Tool addon as `zzz_renodx-dlss.addon64` so it loads last in the ReShade addon order. Toggling On or Off renames the file on disk immediately. RHI recognises both filenames as the same addon — tracking, auto-update, and version swapping all work seamlessly with either name.
 - **Control Ultimate Edition** — installing the Control RR mod now handles everything automatically. RHI upgrades DLSS, deploys the Ray Reconstruction runtime, corrects the HDR preset in renderer.ini, and clears the DLSS SR preset set in the NVIDIA driver profile for the game. A description of what will happen (and a note that this is not an HDR mod) is shown before you confirm.
 
 ### Changes
