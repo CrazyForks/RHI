@@ -123,14 +123,18 @@ public class UnrealEntry : INotifyPropertyChanged
     /// <summary>
     /// Valid size tokens for UE-Extended entries.
     /// </summary>
-    public static readonly string[] SizeValues =
+    /// <summary>
+    /// Valid size tokens for UE-Extended entries — (DisplayLabel, StoredValue) pairs.
+    /// Format upgrade sizes store the label as-is. Special key values show named context.
+    /// </summary>
+    public static readonly (string Label, string Value)[] SizeValues =
     [
-        "Output Size",
-        "Output Ratio",
-        "Any Size",
-        "0",
-        "1",
-        "2",
+        ("Output Size",           "Output Size"),
+        ("Output Ratio",          "Output Ratio"),
+        ("Any Size",              "Any Size"),
+        ("0 — Off / HDR10",       "0"),
+        ("1 — On / scRGB",        "1"),
+        ("2 — Auto Upgrade",      "2"),
     ];
 
     /// <summary>

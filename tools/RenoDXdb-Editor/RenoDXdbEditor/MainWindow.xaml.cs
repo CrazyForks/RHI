@@ -761,8 +761,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
         else
         {
-            foreach (var v in UnrealEntry.SizeValues)
-                sizeCombo.Items.Add(new ComboBoxItem { Content = v, Tag = v });
+            foreach (var (label, val) in UnrealEntry.SizeValues)
+                sizeCombo.Items.Add(new ComboBoxItem { Content = label, Tag = val });
         }
         SelectComboByTag(sizeCombo, size);
         Grid.SetColumn(sizeCombo, 2);
