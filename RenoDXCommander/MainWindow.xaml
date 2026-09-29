@@ -3047,6 +3047,13 @@
                             Foreground="{StaticResource TextDisabledBrush}" FontSize="11"
                             Padding="8,2" VerticalAlignment="Center"
                             ToolTipService.ToolTip="Show message of the day"/>
+                    <Button x:Name="UpdateLogBtn" x:FieldModifier="internal"
+                            Content="Updates"
+                            Click="UpdateLogButton_Click"
+                            Background="Transparent" BorderThickness="0"
+                            Foreground="{StaticResource TextDisabledBrush}" FontSize="11"
+                            Padding="8,2" VerticalAlignment="Center"
+                            ToolTipService.ToolTip="View component update history"/>
                 </StackPanel>
             </Grid>
         </Border>

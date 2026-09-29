@@ -40,6 +40,8 @@ public sealed partial class MainWindow : Window
     private readonly DragDropHandler _dragDropHandler;
     private readonly AddonFileWatcher _addonFileWatcher;
 
+    private UpdateLogWindow? _updateLogWindow;
+
     /// <summary>Exposes the detail panel builder for extracted handler classes.</summary>
     internal DetailPanelBuilder DetailPanelBuilderInstance => _detailPanelBuilder;
 
