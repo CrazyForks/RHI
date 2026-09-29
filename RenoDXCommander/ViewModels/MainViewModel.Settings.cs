@@ -669,6 +669,29 @@ public partial class MainViewModel
         SaveNameMappings();
     }
 
+    // ── ShortFuse ZZZ Mode (load order rename) ────────────────────────────────
+
+    /// <summary>Returns true when the ShortFuse addon should be deployed as zzz_renodx-dlss.addon64.</summary>
+    public bool GetSfZzzMode(string gameName, string store = "")
+    {
+        var key = GameKey.From(gameName, store).ToKey();
+        return _gameNameService.SfZzzMode.Contains(key)
+            || _gameNameService.SfZzzMode.Contains(gameName);
+    }
+
+    /// <summary>Sets whether the ShortFuse addon should be deployed as zzz_renodx-dlss.addon64.</summary>
+    public void SetSfZzzMode(string gameName, bool value, string store = "")
+    {
+        var key = GameKey.From(gameName, store).ToKey();
+        if (value) _gameNameService.SfZzzMode.Add(key);
+        else
+        {
+            _gameNameService.SfZzzMode.Remove(key);
+            _gameNameService.SfZzzMode.Remove(gameName);
+        }
+        SaveNameMappings();
+    }
+
     // ── RTX 40 MFG Unlock ─────────────────────────────────────────────────────
 
     public bool GetRtx40MfgInstalled(string gameName, string store = "")

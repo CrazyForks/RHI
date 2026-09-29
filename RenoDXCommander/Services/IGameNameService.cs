@@ -177,6 +177,8 @@ public interface IGameNameService
     /// <summary>Games where ShortFuse auto-config is explicitly enabled. Absent = disabled.</summary>
     HashSet<string> SfAutoConfigEnabled { get; }
     HashSet<string> DlssNrCostScalerEnabled { get; }
+    /// <summary>Games where the ShortFuse addon is deployed as zzz_renodx-dlss.addon64. Composite-keyed.</summary>
+    HashSet<string> SfZzzMode { get; }
     /// <summary>Per-game RTX 40 MFG installed DLL name. Key = "GameName|Store", Value = DLL filename (e.g. "version.dll").</summary>
     Dictionary<string, string> Rtx40MfgInstalledAs { get; }
     /// <summary>Per-game 20/30 FG Unlock installed DLL name. Key = "GameName|Store", Value = DLL filename.</summary>

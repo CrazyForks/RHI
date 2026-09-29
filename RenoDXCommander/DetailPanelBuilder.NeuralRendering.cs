@@ -570,7 +570,9 @@ public partial class DetailPanelBuilder
                         if (selKey == NrMethodShortFuse)
                         {
                             deployDir    = ModInstallService.GetAddonDeployPath(installPath);
-                            destFileName = "renodx-dlss.addon64";
+                            // Use whichever name is currently on disk (zzz or normal)
+                            bool zzzOnDisk = File.Exists(Path.Combine(deployDir, Renodx5AddonService.SfZzzDeployFileName));
+                            destFileName = zzzOnDisk ? Renodx5AddonService.SfZzzDeployFileName : "renodx-dlss.addon64";
                         }
                         else if (selKey == NrMethodFeeder && card.Is32Bit)
                         {
@@ -1620,6 +1622,54 @@ public partial class DetailPanelBuilder
         // Note shown when ShortFuse method is selected — cost scaler is now built into 310.8.2
         if (effectiveMethod == NrMethodShortFuse)
         {
+            // ── ZZZ Mode toggle (ShortFuse only) ─────────────────────────────
+            bool sfZzzPref = _window.ViewModel.GetSfZzzMode(gameName, store);
+            var zzzRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10, Margin = new Thickness(0, 2, 0, 0) };
+            var zzzLabel = new TextBlock
+            {
+                Text = "ZZZ Load Order",
+                FontSize = 12,
+                Foreground = UIFactory.Brush(ResourceKeys.TextSecondaryBrush),
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            ToolTipService.SetToolTip(zzzLabel,
+                "When On, the ShortFuse addon is deployed as zzz_renodx-dlss.addon64 so it loads last in the ReShade addon order. " +
+                "Required for some games where other addons must initialise before the DLSS Tool.");
+            var zzzToggle = new ToggleSwitch
+            {
+                IsOn = sfZzzPref,
+                OnContent = "On", OffContent = "Off",
+                VerticalAlignment = VerticalAlignment.Center,
+                MinWidth = 0,
+            };
+            zzzToggle.Toggled += (s, ev) =>
+            {
+                bool newVal = zzzToggle.IsOn;
+                _window.ViewModel.SetSfZzzMode(gameName, newVal, store);
+
+                // If SF is already installed, rename the file on disk immediately
+                var deployDir = ModInstallService.GetAddonDeployPath(installPath);
+                var normalPath = System.IO.Path.Combine(deployDir, "renodx-dlss.addon64");
+                var zzzPath    = System.IO.Path.Combine(deployDir, Renodx5AddonService.SfZzzDeployFileName);
+                try
+                {
+                    if (newVal && File.Exists(normalPath) && !File.Exists(zzzPath))
+                    {
+                        File.Move(normalPath, zzzPath);
+                        CrashReporter.Log($"[NeuralRendering.ZzzToggle] Renamed → {Renodx5AddonService.SfZzzDeployFileName} for '{gameName}'");
+                    }
+                    else if (!newVal && File.Exists(zzzPath) && !File.Exists(normalPath))
+                    {
+                        File.Move(zzzPath, normalPath);
+                        CrashReporter.Log($"[NeuralRendering.ZzzToggle] Renamed → renodx-dlss.addon64 for '{gameName}'");
+                    }
+                }
+                catch (Exception ex) { CrashReporter.Log($"[NeuralRendering.ZzzToggle] Rename failed — {ex.Message}"); }
+            };
+            zzzRow.Children.Add(zzzLabel);
+            zzzRow.Children.Add(zzzToggle);
+            nrBody.Children.Add(zzzRow);
+
             nrBody.Children.Add(new TextBlock
             {
                 Text = "Cost Scaler is built into the ShortFuse addon — this toggle is no longer required but remains available if you prefer the standalone version.",
@@ -2016,10 +2066,19 @@ public partial class DetailPanelBuilder
         {
             var deployDir = ModInstallService.GetAddonDeployPath(installPath);
             Directory.CreateDirectory(deployDir);
+            bool sfZzzMode = _window.ViewModel.GetSfZzzMode(gameName, store);
             await Task.Run(() =>
             {
-                File.Copy(sfSourcePath, Path.Combine(deployDir, "renodx-dlss.addon64"), overwrite: true);
+                var normalDest = Path.Combine(deployDir, "renodx-dlss.addon64");
+                var zzzDest    = Path.Combine(deployDir, Renodx5AddonService.SfZzzDeployFileName);
+                File.Copy(sfSourcePath, normalDest, overwrite: true);
                 CrashReporter.Log($"[NeuralRendering] Deployed renodx-dlss.addon64 (v{(useLatest ? "latest" : requestedVersion)}) to '{deployDir}'");
+                if (sfZzzMode)
+                {
+                    if (File.Exists(zzzDest)) File.Delete(zzzDest);
+                    File.Move(normalDest, zzzDest);
+                    CrashReporter.Log($"[NeuralRendering] Renamed to {Renodx5AddonService.SfZzzDeployFileName} (zzz mode)");
+                }
                 // Remove DLSS5 Tool addon if present (mutual exclusivity)
                 var dlss5InDeploy = Path.Combine(deployDir, "renodx-dlss5.addon64");
                 if (File.Exists(dlss5InDeploy)) { File.Delete(dlss5InDeploy); CrashReporter.Log("[NeuralRendering] Removed renodx-dlss5.addon64 (mutual exclusivity)"); }

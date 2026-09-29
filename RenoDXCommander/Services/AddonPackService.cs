@@ -912,7 +912,8 @@ public class AddonPackService : IAddonPackService
                 // Don't remove renodx-dlss (ShortFuse) addon if the NR section owns it
                 // Only guard when RHI placed nvngx_dlssnr.dll (sentinel present) — not when the game ships with it natively
                 if (fileName.Equals("renodx-dlss.addon64", StringComparison.OrdinalIgnoreCase)
-                    || fileName.Equals("renodx-dlss.addon32", StringComparison.OrdinalIgnoreCase))
+                    || fileName.Equals("renodx-dlss.addon32", StringComparison.OrdinalIgnoreCase)
+                    || fileName.Equals(Renodx5AddonService.SfZzzDeployFileName, StringComparison.OrdinalIgnoreCase))
                 {
                     if (File.Exists(Path.Combine(installPath, "nvngx_dlssnr.dll.original")))
                         continue; // ShortFuse NR section placed the NR DLL — leave addon alone

@@ -3,8 +3,8 @@
 ## v2.7.9 beta
 
 ### New
-- **Unity game-specific settings** — RHI now writes the correct per-game INI settings when you install a RenoDX mod for a Unity engine game. Render target upgrades, swapchain format, and other compatibility keys are applied automatically based on the RHI database, with no manual configuration needed.
-- **Control Ultimate Edition** — installing the Control RR mod now handles everything automatically. RHI upgrades DLSS, deploys the Ray Reconstruction runtime, corrects the HDR preset in renderer.ini, and clears the DLSS SR preset set in the NVIDIA driver profile for the game. A description of what will happen (and a note that this is not an HDR mod) is shown before you confirm.
+- **ShortFuse ZZZ Load Order** — a new toggle in the Neural Rendering section (ShortFuse method only) lets you deploy the ShortFuse DLSS addon as `zzz_renodx-dlss.addon64` so it loads last in the ReShade addon order. Toggling On or Off renames the file on disk immediately. RHI recognises both filenames as the same addon — tracking, auto-update, and version swapping all work seamlessly with either name.
+- **Unity game-specific settings**
 
 ### Changes
 - Unity games now show the ✓ or 🔨 status icon next to the installed addon, matching the behaviour for UE-Extended and named mod games.
