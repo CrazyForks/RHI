@@ -72,16 +72,22 @@ public class UnrealEntry : INotifyPropertyChanged
         "B8G8R8A8_TYPELESS",
         "B8G8R8A8_UNORM",
         "B8G8R8A8_UNORM_SRGB",
+        "B10G10R10A2_UNORM",
+        "R8G8B8A8_SNORM",
         "R8G8B8A8_TYPELESS",
         "R8G8B8A8_UNORM",
         "R8G8B8A8_UNORM_SRGB",
         "R10G10B10A2_TYPELESS",
         "R10G10B10A2_UNORM",
+        "R11G11B10_FLOAT",
         "R16G16B16A16_TYPELESS",
         "R16G16B16A16_FLOAT",
         "R16G16B16A16_UNORM",
         "R32G32B32A32_TYPELESS",
         "R32G32B32A32_FLOAT",
+        "Upgrade_CopyDestinations",
+        "Upgrade_SwapChainCompatibility",
+        "Upgrade_UseSCRGB",
     ];
 
     /// <summary>
@@ -121,6 +127,9 @@ public class UnrealEntry : INotifyPropertyChanged
         "Output Size",
         "Output Ratio",
         "Any Size",
+        "0",
+        "1",
+        "2",
     ];
 
     /// <summary>
