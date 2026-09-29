@@ -1,6 +1,4 @@
-## v2.7.9 beta
-
-## v2.7.9 beta
+## v2.7.9
 
 ### New
 - **Unity game-specific settings** — RHI now writes the correct per-game INI settings when you install a RenoDX mod for a Unity engine game. Render target upgrades, swapchain format, and other compatibility keys are applied automatically based on the RHI database, with no manual configuration needed.
