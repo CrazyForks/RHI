@@ -594,6 +594,47 @@ public sealed partial class MainWindow
             topGridRow++;
         }
 
+        // ── Upgrade Path row (below nits, above Compatibility Settings) ───────
+        if (iniExists && renodxSection != null && renodxSection.ContainsKey("Set_Path"))
+        {
+            topGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            var upLabel = new TextBlock
+            {
+                Text = "Upgrade Path",
+                FontSize = 11,
+                Foreground = UIFactory.Brush(ResourceKeys.TextSecondaryBrush),
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            Grid.SetRow(upLabel, topGridRow);
+            Grid.SetColumn(upLabel, 0);
+            topGrid.Children.Add(upLabel);
+
+            var upCombo = new ComboBox { FontSize = 11, HorizontalAlignment = HorizontalAlignment.Stretch };
+            upCombo.Items.Add("HDR / Off");
+            upCombo.Items.Add("SDR / On");
+            int.TryParse(renodxSection["Set_Path"], out var setPathVal);
+            upCombo.SelectedIndex = setPathVal >= 0 && setPathVal < 2 ? setPathVal : 0;
+            upCombo.SelectionChanged += (s, ev) =>
+            {
+                if (upCombo.SelectedIndex < 0) return;
+                try
+                {
+                    var freshIni = AuxInstallService.ParseIni(File.ReadAllLines(iniPath));
+                    if (freshIni.TryGetValue("renodx", out var sec))
+                    {
+                        sec["Set_Path"] = upCombo.SelectedIndex.ToString();
+                        AuxInstallService.WriteIni(iniPath, freshIni);
+                    }
+                }
+                catch (Exception ex) { card.ActionMessage = $"❌ {ex.Message}"; }
+            };
+            Grid.SetRow(upCombo, topGridRow);
+            Grid.SetColumn(upCombo, 1);
+            topGrid.Children.Add(upCombo);
+            topGridRow++;
+        }
+
         content.Children.Add(topGrid);
 
         // ── Compatibility Settings from [renodx] section ──────────────────────
@@ -603,7 +644,6 @@ public sealed partial class MainWindow
                 .Where(kv => (kv.Key.StartsWith("Upgrade_", StringComparison.OrdinalIgnoreCase)
                               && !kv.Key.Equals("Upgrade_UseSCRGB", StringComparison.OrdinalIgnoreCase)
                               && !kv.Key.Equals("Upgrade_CopyDestinations", StringComparison.OrdinalIgnoreCase))
-                          || kv.Key.Equals("Set_Path", StringComparison.OrdinalIgnoreCase)
                           || kv.Key.Equals("DumpLUTShaders", StringComparison.OrdinalIgnoreCase)
                           || kv.Key.Equals("SettingsMode",           StringComparison.OrdinalIgnoreCase)
                           || kv.Key.Equals("Proxy_Revert_State",     StringComparison.OrdinalIgnoreCase)
