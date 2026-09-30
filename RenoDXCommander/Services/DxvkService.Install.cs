@@ -324,19 +324,16 @@ public partial class DxvkService
             HasUpdate = false;
 
             // DX10/DX11 DXVK installs Vulkan via the global layer (same as DX9).
-            // Set the same card state the DX9 path sets so the badge, RS detection,
-            // and Vulkan rendering path all behave identically.
-            var originalDx11Api = card.GraphicsApi;
-            if (originalDx11Api is not GraphicsApiType.DirectX8
-                                and not GraphicsApiType.DirectX9)
+            // Set VulkanRenderingPath so ReShade uses the Vulkan layer and the
+            // RS record is re-checked for the Vulkan layer version.
+            // Do NOT flip GraphicsApi to Vulkan for DX11 — unlike DX9 where the game
+            // genuinely runs as Vulkan, DX11+DXVK is a translation layer and the card
+            // must keep GraphicsApi=DirectX11 so SwitchReShadeForDxvk, uninstall, and
+            // all existing guards continue to work correctly.
+            if (card.GraphicsApi is not GraphicsApiType.DirectX8
+                                 and not GraphicsApiType.DirectX9)
             {
-                // Preserve the original API in DetectedApis so searches still find the game
-                if (!card.DetectedApis.Contains(originalDx11Api))
-                    card.DetectedApis.Add(originalDx11Api);
-                card.DetectedApis.Add(GraphicsApiType.Vulkan);
-                card.GraphicsApi = GraphicsApiType.Vulkan;
                 card.VulkanRenderingPath = "Vulkan";
-                card.IsDualApiGame = false;
 
                 // Clear any stale DX-proxy RS record so the Vulkan RS re-check fires
                 if (card.RsRecord != null
