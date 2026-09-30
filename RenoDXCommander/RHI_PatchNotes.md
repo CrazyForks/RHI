@@ -5,7 +5,7 @@
 - **Component update history now includes RenoDX mod updates** — installs and updates applied via Update All are now captured in the Updates log alongside shader packs, ReShade, and other components.
 
 ### Changes
-- Minimum window width increased to 1220px.
+- Minimum window width set to 1220px.
 
 ### Bug Fixes
 
