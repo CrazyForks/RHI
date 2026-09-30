@@ -158,7 +158,8 @@ public partial class MainViewModel
         try
         {
             await _dxvkService.UninstallAsync(card);
-            
+            card.DxvkEnabled = false; // must be cleared so RequiresVulkanInstall returns false after uninstall
+
             // Clear persisted Vulkan rendering path
             SetVulkanRenderingPath(card.GameName, "DirectX", card.Source ?? "");
 
@@ -181,6 +182,10 @@ public partial class MainViewModel
             card.NotifyAll();
             card.FadeMessage(m => card.DxvkActionMessage = m, card.DxvkActionMessage);
             SaveLibrary();
+
+            // Deploy shaders now that ReShade is back as DX proxy
+            if (card.RsStatus == GameStatus.Installed && !string.IsNullOrEmpty(card.InstallPath))
+                DeployShadersForCard(card.GameName);
 
             // Rebuild the detail panel — uninstall reverts GraphicsApi and RS state.
             RequestDetailPanelRebuild?.Invoke(card);
