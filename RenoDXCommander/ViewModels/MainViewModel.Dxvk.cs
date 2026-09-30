@@ -105,6 +105,7 @@ public partial class MainViewModel
                 screenshotHotkey: _settingsViewModel.ScreenshotHotkey);
 
             card.DxvkActionMessage = "✅ DXVK installed!";
+            card.DxvkEnabled = true; // must be set so RequiresVulkanInstall returns true for DX11
             card.NotifyAll();
             card.FadeMessage(m => card.DxvkActionMessage = m, card.DxvkActionMessage);
 
