@@ -10,7 +10,7 @@
 ### Bug Fixes
 
 **DXVK**
-- Fixed DXVK not registering DX10/DX11 games as using Vulkan ReShade after install. The game card now correctly switches to Vulkan mode, the badge updates, and the state persists across restarts — matching the existing DX9 behaviour exactly.
+- Fixed DXVK not registering DX10/DX11 games as using Vulkan ReShade after install. The game card now correctly switches to Vulkan mode, the badge updates, shaders are deployed, and the state persists across restarts — matching the existing DX9 behaviour. Uninstall now correctly restores ReShade as a DX proxy and deploys shaders back.
 
 **UI**
 - Fixed the UI freezing for 30–60 seconds after clicking Check for Updates when a game with a large NVIDIA driver profile (e.g. Mass Effect Andromeda) was selected. The NVIDIA profile panel now skips its rebuild while the Settings panel is open, since it isn't visible and the expensive layout work is pointless.
