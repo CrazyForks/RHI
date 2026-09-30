@@ -12,6 +12,9 @@
 **OptiScaler**
 - Fixed OptiScaler uninstall deleting the game's `plugins\` folder — wiping Cyber Engine Tweaks, RED4ext, and other game mods on Cyberpunk 2077. The uninstall now skips the root `plugins\` folder entirely; `OptiPatcher.asi` is still removed correctly via a dedicated step that only deletes that specific file and only removes the folder if it is empty after.
 
+**File Watcher**
+- Fixed RenoDX and Luma archives being deleted from the Downloads folder when clicking Cancel on the game selection dialog. Archives are no longer auto-deleted — only direct `.addon` files are removed after a successful install.
+
 **DXVK**
 - Fixed DXVK not registering DX10/DX11 games as using Vulkan ReShade after install. The game card now correctly switches to Vulkan mode, the badge updates, shaders are deployed, and the state persists across restarts — matching the existing DX9 behaviour. Uninstall now correctly restores ReShade as a DX proxy and deploys shaders back.
 
