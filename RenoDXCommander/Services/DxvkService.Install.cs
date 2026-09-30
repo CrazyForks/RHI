@@ -323,6 +323,39 @@ public partial class DxvkService
             card.DxvkRecord = record;
             HasUpdate = false;
 
+            // DX10/DX11 DXVK installs Vulkan via the global layer (same as DX9).
+            // Set the same card state the DX9 path sets so the badge, RS detection,
+            // and Vulkan rendering path all behave identically.
+            var originalDx11Api = card.GraphicsApi;
+            if (originalDx11Api is not GraphicsApiType.DirectX8
+                                and not GraphicsApiType.DirectX9)
+            {
+                // Preserve the original API in DetectedApis so searches still find the game
+                if (!card.DetectedApis.Contains(originalDx11Api))
+                    card.DetectedApis.Add(originalDx11Api);
+                card.DetectedApis.Add(GraphicsApiType.Vulkan);
+                card.GraphicsApi = GraphicsApiType.Vulkan;
+                card.VulkanRenderingPath = "Vulkan";
+                card.IsDualApiGame = false;
+
+                // Clear any stale DX-proxy RS record so the Vulkan RS re-check fires
+                if (card.RsRecord != null
+                    && record.InstalledDlls.Any(d => d.Equals(card.RsRecord.InstalledAs, StringComparison.OrdinalIgnoreCase)))
+                {
+                    card.RsRecord = null;
+                    card.RsStatus = GameStatus.NotInstalled;
+                    card.RsInstalledFile = null;
+                }
+
+                // Update RS status to reflect the Vulkan layer now in use
+                var vulkanVersion = AuxInstallService.ReadInstalledVersion(
+                    VulkanLayerService.LayerDirectory, VulkanLayerService.LayerDllName);
+                card.RsInstalledVersion = vulkanVersion;
+                card.RsStatus = GameStatus.Installed;
+                card.RefreshBackupState();
+            }
+            card.NotifyAll();
+
             progress?.Report(("DXVK installed!", 100));
             CrashReporter.Log($"[DxvkService.InstallAsync] Install complete for {card.GameName}");
         }

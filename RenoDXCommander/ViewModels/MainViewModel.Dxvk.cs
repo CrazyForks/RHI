@@ -116,7 +116,9 @@ public partial class MainViewModel
             SaveLibrary();
 
             // Persist Vulkan rendering path if direct DX9 mode switched the game to Vulkan
-            if (card.DxvkRecord?.InstalledDlls.Contains("d3d9.dll") == true && card.VulkanRenderingPath == "Vulkan")
+            // Persist Vulkan rendering path for any DXVK install that switched to Vulkan —
+            // not just DX9 (d3d9.dll) but also DX10/DX11 (dxgi.dll / d3d11.dll).
+            if (card.DxvkStatus == GameStatus.Installed && card.VulkanRenderingPath == "Vulkan")
                 SetVulkanRenderingPath(card.GameName, "Vulkan", card.Source ?? "");
 
             // Deploy shaders — DXVK sets up a Vulkan ReShade environment so the
